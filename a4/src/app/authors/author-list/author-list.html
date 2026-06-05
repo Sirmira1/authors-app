@@ -1,0 +1,37 @@
+<div>
+    <h2>Authors List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip</th>
+                <th>Contract</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let author of authors">
+                <td>{{ author.au_id }}</td>
+                <td>{{ author.au_fname }}</td>
+                <td>{{ author.au_lname }}</td>
+                <td>{{ author.phone }}</td>
+                <td>{{ author.address }}</td>
+                <td>{{ author.city }}</td>
+                <td>{{ author.state }}</td>
+                <td>{{ author.zip }}</td>
+                <td>{{ author.contract }}</td>
+                <td>
+                    <button [routerLink]="author.au_id ? ['/authors', author.au_id] : ['/authors']" [disabled]="!author.au_id">View Author Details</button>
+                    <button [routerLink]="author.au_id ? ['/authors/edit', author.au_id] : ['/authors']" [disabled]="!author.au_id">Edit Author</button>
+                    <button (click)="deleteAuthor(author.au_id)" [disabled]="!author.au_id">Delete Author</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

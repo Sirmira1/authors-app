@@ -1,0 +1,103 @@
+:host {
+    display: block;
+}
+
+div {
+    margin: var(--on-space-6) auto;
+    max-width: 1200px;
+    padding: var(--on-space-6);
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-lg);
+    background: var(--on-white);
+    box-shadow: var(--on-shadow);
+}
+
+h2 {
+    margin-bottom: var(--on-space-5);
+    color: var(--on-charcoal);
+    padding-bottom: var(--on-space-3);
+    border-bottom: 3px solid var(--on-green);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-md);
+    overflow: hidden;
+    background: var(--on-white);
+}
+
+thead th {
+    padding: var(--on-space-3) var(--on-space-4);
+    text-align: left;
+    font-weight: 700;
+    color: var(--on-white);
+    background: var(--on-charcoal);
+    border-bottom: 3px solid var(--on-green);
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: var(--on-space-3) var(--on-space-4);
+    border-bottom: 1px solid #dde5eb;
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+    background: #f7fafc;
+}
+
+tbody tr:hover {
+    background: var(--on-blue-soft);
+}
+
+td:last-child {
+    min-width: 360px;
+}
+
+button {
+    margin: 0 var(--on-space-2) var(--on-space-2) 0;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: var(--on-radius-sm);
+    background: var(--on-blue);
+    color: var(--on-white);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.08s ease;
+}
+
+button:hover {
+    background: var(--on-blue-strong);
+}
+
+button:active {
+    background: var(--on-blue-strong);
+    transform: translateY(1px);
+}
+
+button:last-child {
+    background: var(--on-green);
+}
+
+button:last-child:hover {
+    background: var(--on-green-strong);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+@media (max-width: 1100px) {
+    div {
+        padding: var(--on-space-4);
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

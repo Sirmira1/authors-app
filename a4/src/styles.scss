@@ -1,0 +1,70 @@
+/* Ontario government-inspired design system */
+:root {
+    --on-green: #097a0a;
+    --on-charcoal: #333;
+    --on-white: #fff;
+    --on-blue: #2179b7;
+
+    --on-green-strong: #076108;
+    --on-blue-strong: #195f90;
+    --on-blue-soft: #e8f2f9;
+    --on-border: #c9d4dd;
+    --on-bg: #eef3f6;
+    --on-muted: #5c6973;
+    --on-focus: #ffbf47;
+
+    --on-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    --on-radius-sm: 4px;
+    --on-radius-md: 8px;
+    --on-radius-lg: 12px;
+
+    --on-space-1: 0.25rem;
+    --on-space-2: 0.5rem;
+    --on-space-3: 0.75rem;
+    --on-space-4: 1rem;
+    --on-space-5: 1.25rem;
+    --on-space-6: 1.5rem;
+    --on-space-8: 2rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Noto Sans', 'Segoe UI', Tahoma, Arial, sans-serif;
+    color: var(--on-charcoal);
+    background:
+        linear-gradient(180deg, #dde8ef 0, #eef3f6 220px),
+        var(--on-bg);
+    line-height: 1.45;
+}
+
+h2 {
+    margin: 0 0 var(--on-space-4);
+    font-size: 1.45rem;
+    line-height: 1.25;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+:focus-visible {
+    outline: 3px solid var(--on-focus);
+    outline-offset: 2px;
+}
+
+a {
+    color: var(--on-blue);
+}
+
+a:hover {
+    color: var(--on-blue-strong);
+}

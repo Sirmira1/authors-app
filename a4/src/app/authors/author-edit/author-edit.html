@@ -1,0 +1,47 @@
+<div *ngIf="author; else notFound">
+    <h2>Edit Author</h2>
+    <form (ngSubmit)="saveAuthor()">
+        <div>
+            <label for="auId">ID:</label>
+            <input id="auId" [(ngModel)]="author.au_id" name="au_id" required placeholder="123-45-6789" />
+        </div>
+        <div>
+            <label for="auFname">First Name:</label>
+            <input id="auFname" [(ngModel)]="author.au_fname" name="au_fname" required placeholder="e.g. Abraham" />
+        </div>
+        <div>
+            <label for="auLname">Last Name:</label>
+            <input id="auLname" [(ngModel)]="author.au_lname" name="au_lname" required placeholder="e.g. Bennet" />
+        </div>
+        <div>
+            <label for="phone">Phone:</label>
+            <input id="phone" [(ngModel)]="author.phone" name="phone" placeholder="e.g. 415 658-9932" />
+        </div>
+        <div>
+            <label for="address">Address:</label>
+            <input id="address" [(ngModel)]="author.address" name="address" placeholder="e.g. 55 Hillsdale Bl." />
+        </div>
+        <div>
+            <label for="city">City:</label>
+            <input id="city" [(ngModel)]="author.city" name="city" placeholder="e.g. Berkeley" />
+        </div>
+        <div>
+            <label for="state">State:</label>
+            <input id="state" [(ngModel)]="author.state" name="state" placeholder="CA" />
+        </div>
+        <div>
+            <label for="zip">Zip:</label>
+            <input id="zip" [(ngModel)]="author.zip" name="zip" placeholder="94705" />
+        </div>
+        <div>
+            <label for="contract">Contract:</label>
+            <input id="contract" type="checkbox" [(ngModel)]="author.contract" name="contract" />
+        </div>
+        <button type="submit">Save</button>
+        <button type="button" routerLink="/authors">Cancel</button>
+    </form>
+</div>
+<ng-template #notFound>
+    <p>Author not found.</p>
+    <button routerLink="/authors">Back to Authors</button>
+</ng-template>

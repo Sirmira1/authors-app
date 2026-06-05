@@ -1,0 +1,17 @@
+<div *ngIf="author; else notFound">
+    <h2>Author Details</h2>
+    <p><strong>ID:</strong> {{ author.au_id }}</p>
+    <p><strong>First Name:</strong> {{ author.au_fname }}</p>
+    <p><strong>Last Name:</strong> {{ author.au_lname }}</p>
+    <p><strong>Phone:</strong> {{ author.phone }}</p>
+    <p><strong>Address:</strong> {{ author.address }}</p>
+    <p><strong>City:</strong> {{ author.city }}</p>
+    <p><strong>State:</strong> {{ author.state }}</p>
+    <p><strong>Zip:</strong> {{ author.zip }}</p>
+    <p><strong>Contract:</strong> {{ author.contract }}</p>
+    <button type="button" routerLink="/authors">Back</button>
+</div>
+<ng-template #notFound>
+    <p>Author not found.</p>
+    <button type="button" routerLink="/authors">Back</button>
+</ng-template>

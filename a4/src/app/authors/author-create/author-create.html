@@ -1,0 +1,23 @@
+<form #createForm="ngForm" (ngSubmit)="createAuthor(createForm)">
+    <h2>Create Author</h2>
+    <p class="form-error" [style.display]="errorMessage ? 'block' : 'none'">{{ errorMessage }}</p>
+    <label for="auId">Author ID:</label>
+    <input type="text" id="auId" [(ngModel)]="author.au_id" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789">
+    <label for="auFname">First Name:</label>
+    <input type="text" id="auFname" [(ngModel)]="author.au_fname" name="au_fname" required placeholder="e.g. Abraham">
+    <label for="auLname">Last Name:</label>
+    <input type="text" id="auLname" [(ngModel)]="author.au_lname" name="au_lname" required placeholder="e.g. Bennet">
+    <label for="phone">Phone:</label>
+    <input type="text" id="phone" [(ngModel)]="author.phone" name="phone" required placeholder="e.g. 415 658-9932">
+    <label for="address">Address:</label>
+    <input type="text" id="address" [(ngModel)]="author.address" name="address" required placeholder="e.g. 55 Hillsdale Bl.">
+    <label for="city">City:</label>
+    <input type="text" id="city" [(ngModel)]="author.city" name="city" required placeholder="e.g. Berkeley">
+    <label for="state">State:</label>
+    <input type="text" id="state" [(ngModel)]="author.state" name="state" required pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like CA" placeholder="CA">
+    <label for="zip">Zip:</label>
+    <input type="text" id="zip" [(ngModel)]="author.zip" name="zip" required pattern="^\d{5}$" maxlength="5" inputmode="numeric" title="Use 5-digit zip code" placeholder="94705">
+    <label for="contract">Contract:</label>
+    <input type="checkbox" id="contract" [(ngModel)]="author.contract" name="contract">
+    <button type="submit" [disabled]="isSubmitting || createForm.invalid">{{ isSubmitting ? 'Creating...' : 'Create Author' }}</button>
+</form>
