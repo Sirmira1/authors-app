@@ -6,12 +6,62 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const ID_PATTERN = /^\d{3}-\d{2}-\d{4}$/;
+const STATE_PATTERN = /^[A-Za-z]{2}$/;
+const ZIP_PATTERN = /^\d{5}$/;
+
+const requiredEnvVars = ["DB_SERVER", "DB_DATABASE"];
+const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
+
+if (missingEnvVars.length > 0) {
+  console.error(`Missing required environment variables: ${missingEnvVars.join(", ")}`);
+  process.exit(1);
+}
+
 app.use(cors());
 app.use(express.json());
 
 const connectionString = `Driver={ODBC Driver 17 for SQL Server};Server=${process.env.DB_SERVER};Database=${process.env.DB_DATABASE};Trusted_Connection=Yes;TrustServerCertificate=Yes;`;
 
 let pool;
+
+function isValidAuthorId(id) {
+  return typeof id === "string" && ID_PATTERN.test(id.trim());
+}
+
+function normalizeAuthorPayload(body) {
+  return {
+    au_id: typeof body.au_id === "string" ? body.au_id.trim() : "",
+    au_lname: typeof body.au_lname === "string" ? body.au_lname.trim() : "",
+    au_fname: typeof body.au_fname === "string" ? body.au_fname.trim() : "",
+    phone: typeof body.phone === "string" ? body.phone.trim() : "",
+    address: typeof body.address === "string" ? body.address.trim() : "",
+    city: typeof body.city === "string" ? body.city.trim() : "",
+    state: typeof body.state === "string" ? body.state.trim().toUpperCase() : "",
+    zip: typeof body.zip === "string" ? body.zip.trim() : "",
+    contract: Boolean(body.contract),
+  };
+}
+
+function validateAuthorPayload(author, options = { includeId: true }) {
+  if (!author.au_lname || !author.au_fname) {
+    return "au_lname and au_fname are required";
+  }
+
+  if (options.includeId && !isValidAuthorId(author.au_id)) {
+    return "au_id is required and must match 123-45-6789";
+  }
+
+  if (author.state && !STATE_PATTERN.test(author.state)) {
+    return "state must be 2 letters when provided";
+  }
+
+  if (author.zip && !ZIP_PATTERN.test(author.zip)) {
+    return "zip must be 5 digits when provided";
+  }
+
+  return null;
+}
 
 // connect
 async function connectToDatabase() {
@@ -55,6 +105,9 @@ app.get("/api/authors/:id", async (req, res) => {
       return res.status(500).json({ error: 'Database connection not established' });
     }
     const id = req.params.id;
+    if (!isValidAuthorId(id)) {
+      return res.status(400).json({ error: 'Invalid author id format. Expected 123-45-6789' });
+    }
     const result = await pool.request().input("au_id", sql.VarChar(11), id).query('SELECT * FROM authors WHERE au_id = @au_id');
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: 'Author not found' });
@@ -68,23 +121,26 @@ app.get("/api/authors/:id", async (req, res) => {
 
 // create a new author
 app.post("/api/authors", async (req, res) => {
-  try {    if (!pool) {
+  try {
+    if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
     }
-    const { au_id, au_lname, au_fname, phone, address, city, state, zip, contract } = req.body;
-    if (!au_id || !au_lname || !au_fname) {
-      return res.status(400).json({ error: 'au_id, au_lname, and au_fname are required' });
+    const author = normalizeAuthorPayload(req.body);
+    const validationError = validateAuthorPayload(author, { includeId: true });
+
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
     await pool.request()
-      .input("au_id", sql.VarChar(11), au_id)
-      .input("au_lname", sql.VarChar(40), au_lname)
-      .input("au_fname", sql.VarChar(40), au_fname)
-      .input("phone", sql.Char(12), phone)
-      .input("address", sql.VarChar(60), address)
-      .input("city", sql.VarChar(30), city)
-      .input("state", sql.Char(2), state)
-      .input("zip", sql.Char(10), zip)
-      .input("contract", sql.Bit, contract ? 1 : 0)
+      .input("au_id", sql.VarChar(11), author.au_id)
+      .input("au_lname", sql.VarChar(40), author.au_lname)
+      .input("au_fname", sql.VarChar(40), author.au_fname)
+      .input("phone", sql.Char(12), author.phone)
+      .input("address", sql.VarChar(60), author.address)
+      .input("city", sql.VarChar(30), author.city)
+      .input("state", sql.Char(2), author.state)
+      .input("zip", sql.Char(10), author.zip)
+      .input("contract", sql.Bit, author.contract ? 1 : 0)
       .query('INSERT INTO authors (au_id, au_lname, au_fname, phone, address, city, state, zip, contract) VALUES (@au_id, @au_lname, @au_fname, @phone, @address, @city, @state, @zip, @contract)');
     res.status(201).json({ message: 'Author created successfully' });
   } catch (err) {
@@ -96,23 +152,31 @@ app.post("/api/authors", async (req, res) => {
 // update an author
 app.put("/api/authors/:id", async (req, res) => {
   try {
-    if (!pool) {    return res.status(500).json({ error: 'Database connection not established' });
+    if (!pool) {
+      return res.status(500).json({ error: 'Database connection not established' });
     }
     const id = req.params.id;
-    const { au_lname, au_fname, phone, address, city, state, zip, contract } = req.body;
-    if (!au_lname || !au_fname) {
-      return res.status(400).json({ error: 'au_lname and au_fname are required' });
+    if (!isValidAuthorId(id)) {
+      return res.status(400).json({ error: 'Invalid author id format. Expected 123-45-6789' });
     }
+
+    const author = normalizeAuthorPayload({ ...req.body, au_id: id });
+    const validationError = validateAuthorPayload(author, { includeId: false });
+
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
     const result = await pool.request()
       .input("au_id", sql.VarChar(11), id)
-      .input("au_lname", sql.VarChar(40), au_lname)
-      .input("au_fname", sql.VarChar(40), au_fname)
-      .input("phone", sql.Char(12), phone)
-      .input("address", sql.VarChar(60), address)
-      .input("city", sql.VarChar(30), city)
-      .input("state", sql.Char(2), state)
-      .input("zip", sql.Char(10), zip)
-      .input("contract", sql.Bit, contract ? 1 : 0)
+      .input("au_lname", sql.VarChar(40), author.au_lname)
+      .input("au_fname", sql.VarChar(40), author.au_fname)
+      .input("phone", sql.Char(12), author.phone)
+      .input("address", sql.VarChar(60), author.address)
+      .input("city", sql.VarChar(30), author.city)
+      .input("state", sql.Char(2), author.state)
+      .input("zip", sql.Char(10), author.zip)
+      .input("contract", sql.Bit, author.contract ? 1 : 0)
       .query('UPDATE authors SET au_lname = @au_lname, au_fname = @au_fname, phone = @phone, address = @address, city = @city, state = @state, zip = @zip, contract = @contract WHERE au_id = @au_id');
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ error: 'Author not found' });
@@ -131,6 +195,9 @@ app.delete("/api/authors/:id", async (req, res) => {
       return res.status(500).json({ error: 'Database connection not established' });
     }
     const id = req.params.id;
+    if (!isValidAuthorId(id)) {
+      return res.status(400).json({ error: 'Invalid author id format. Expected 123-45-6789' });
+    }
     const result = await pool.request().input("au_id", sql.VarChar(11), id).query('DELETE FROM authors WHERE au_id = @au_id');
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ error: 'Author not found' });

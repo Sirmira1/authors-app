@@ -1,17 +1,21 @@
 import { Component } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthorService, Author } from '../author';
 
 @Component({
   selector: 'app-author-create',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './author-create.html',
   styleUrl: './author-create.scss',
 })
 export class AuthorCreateComponent {
   isSubmitting = false;
   errorMessage = '';
+  readonly idPattern = /^\d{3}-\d{2}-\d{4}$/;
+  readonly statePattern = /^[A-Za-z]{2}$/;
+  readonly zipPattern = /^\d{5}$/;
 
   author: Author = {
     au_id: '',
@@ -64,14 +68,14 @@ export class AuthorCreateComponent {
   }
 
   private hasValidAuthorFormat(): boolean {
-    const idPattern = /^\d{3}-\d{2}-\d{4}$/;
-    const statePattern = /^[A-Za-z]{2}$/;
-    const zipPattern = /^\d{5}$/;
-
     return (
-      idPattern.test(this.author.au_id.trim()) &&
-      statePattern.test(this.author.state.trim()) &&
-      zipPattern.test(this.author.zip.trim())
+      this.idPattern.test(this.author.au_id.trim()) &&
+      this.statePattern.test(this.author.state.trim()) &&
+      this.zipPattern.test(this.author.zip.trim())
     );
+  }
+
+  showFieldError(control: NgModel): boolean {
+    return !!(control.invalid && (control.dirty || control.touched));
   }
 }

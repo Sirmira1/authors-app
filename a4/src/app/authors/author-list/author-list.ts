@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Author, AuthorService } from '../author';
-import { error } from 'console';
 
 @Component({
   selector: 'app-author-list',
@@ -20,7 +19,6 @@ export class AuthorListComponent {
   loadAuthors() {
     this.authorService.getAuthors().subscribe({
       next: authors => {
-        console.log('Authors loaded:', authors);
         this.authors = authors;
       },
       error: err => console.error('Error loading authors', err)

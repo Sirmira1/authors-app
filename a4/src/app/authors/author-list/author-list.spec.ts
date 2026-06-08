@@ -1,17 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 
-import { AuthorList } from './author-list';
+import { AuthorListComponent } from './author-list';
 
-describe('AuthorList', () => {
-  let component: AuthorList;
-  let fixture: ComponentFixture<AuthorList>;
+describe('AuthorListComponent', () => {
+  let component: AuthorListComponent;
+  let fixture: ComponentFixture<AuthorListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthorList],
+      imports: [AuthorListComponent],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AuthorList);
+    fixture = TestBed.createComponent(AuthorListComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -31,6 +31,13 @@ h2 {
     font-weight: 600;
 }
 
+.field-error {
+    margin: calc(var(--on-space-2) * -1) 0 0;
+    color: #b10e1e;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
 label {
     margin-bottom: calc(var(--on-space-2) * -1);
     font-weight: 650;
@@ -50,6 +57,11 @@ input {
 input:focus {
     border-color: var(--on-blue);
     box-shadow: 0 0 0 3px rgba(33, 121, 183, 0.2);
+}
+
+input.input-invalid {
+    border-color: #b10e1e;
+    box-shadow: 0 0 0 3px rgba(177, 14, 30, 0.16);
 }
 
 input[type='checkbox'] {
