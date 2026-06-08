@@ -1,23 +1,20 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { AuthorService, Author } from '../author';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthorFormComponent } from '../author-form/author-form';
 
 @Component({
   selector: 'app-author-edit',
-  imports: [RouterLink, FormsModule, CommonModule],
+  imports: [CommonModule, AuthorFormComponent],
   templateUrl: './author-edit.html',
   styleUrl: './author-edit.scss',
 })
 export class AuthorEditComponent {
   author: Author | undefined;
   authorId: string | null = null;
+  isSubmitting = false;
   errorMessage = '';
-  readonly idPattern = /^\d{3}-\d{2}-\d{4}$/;
-  readonly statePattern = /^[A-Za-z]{2}$/;
-  readonly zipPattern = /^\d{5}$/;
 
   constructor(
     private authorService: AuthorService,
@@ -28,46 +25,39 @@ export class AuthorEditComponent {
     if (this.authorId) {
       this.authorService.getAuthorById(this.authorId).subscribe({
         next: author => {
+          this.errorMessage = '';
           this.author = author;
         },
-        error: err => console.error('Error loading author', err)
-      });
-    } 
-  }
-  saveAuthor(form: NgForm) : void {
-    if (!this.author || form.invalid || !this.hasValidAuthorFormat()) {
-      this.errorMessage = 'Please fix invalid fields. Format: ID 123-45-6789, State 2 letters, Zip 5 digits.';
-      return;
-    }
-
-    this.errorMessage = '';
-
-    if (this.authorId && this.author) {
-      this.authorService.updateAuthor(this.author).subscribe({
-        next: () => {
-          this.router.navigate(['/authors']);
-        },
         error: err => {
-          this.errorMessage = 'Could not update author. Check field formats and try again.';
-          console.error('Error updating author', err);
+          this.errorMessage = 'Could not load author details.';
+          console.error('Error loading author', err);
         }
       });
     }
   }
 
-  showFieldError(control: NgModel): boolean {
-    return !!(control.invalid && (control.dirty || control.touched));
-  }
-
-  private hasValidAuthorFormat(): boolean {
-    if (!this.author) {
-      return false;
+  saveAuthor(authorPayload: Author): void {
+    if (!this.authorId) {
+      return;
     }
 
-    return (
-      this.idPattern.test((this.author.au_id ?? '').trim()) &&
-      this.statePattern.test((this.author.state ?? '').trim()) &&
-      this.zipPattern.test((this.author.zip ?? '').trim())
-    );
+    this.errorMessage = '';
+    this.isSubmitting = true;
+
+    this.authorService.updateAuthor(authorPayload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.router.navigate(['/authors']);
+      },
+      error: err => {
+        this.isSubmitting = false;
+        this.errorMessage = 'Could not update author. Check field formats and try again.';
+        console.error('Error updating author', err);
+      }
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/authors']);
   }
 }

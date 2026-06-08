@@ -1,32 +1,7 @@
-<form #createForm="ngForm" (ngSubmit)="createAuthor(createForm)">
-    <h2>Create Author</h2>
-    <p class="form-error" [style.display]="errorMessage ? 'block' : 'none'">{{ errorMessage }}</p>
-    <label for="auId">Author ID:</label>
-    <input type="text" id="auId" [(ngModel)]="author.au_id" #auIdModel="ngModel" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789" [class.input-invalid]="showFieldError(auIdModel)">
-    <p class="field-error" *ngIf="showFieldError(auIdModel)">
-        Incorrect format. Use 123-45-6789.
-    </p>
-    <label for="auFname">First Name:</label>
-    <input type="text" id="auFname" [(ngModel)]="author.au_fname" #auFnameModel="ngModel" name="au_fname" required placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)">
-    <label for="auLname">Last Name:</label>
-    <input type="text" id="auLname" [(ngModel)]="author.au_lname" #auLnameModel="ngModel" name="au_lname" required placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)">
-    <label for="phone">Phone:</label>
-    <input type="text" id="phone" [(ngModel)]="author.phone" #phoneModel="ngModel" name="phone" required placeholder="e.g. 415 658-9932" [class.input-invalid]="showFieldError(phoneModel)">
-    <label for="address">Address:</label>
-    <input type="text" id="address" [(ngModel)]="author.address" #addressModel="ngModel" name="address" required placeholder="e.g. 55 Hillsdale Bl." [class.input-invalid]="showFieldError(addressModel)">
-    <label for="city">City:</label>
-    <input type="text" id="city" [(ngModel)]="author.city" #cityModel="ngModel" name="city" required placeholder="e.g. Berkeley" [class.input-invalid]="showFieldError(cityModel)">
-    <label for="state">State:</label>
-    <input type="text" id="state" [(ngModel)]="author.state" #stateModel="ngModel" name="state" required pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like CA" placeholder="CA" [class.input-invalid]="showFieldError(stateModel)">
-    <p class="field-error" *ngIf="showFieldError(stateModel)">
-        Incorrect format. Use a 2-letter code, for example CA.
-    </p>
-    <label for="zip">Zip:</label>
-    <input type="text" id="zip" [(ngModel)]="author.zip" #zipModel="ngModel" name="zip" required pattern="^\d{5}$" maxlength="5" inputmode="numeric" title="Use 5-digit zip code" placeholder="94705" [class.input-invalid]="showFieldError(zipModel)">
-    <p class="field-error" *ngIf="showFieldError(zipModel)">
-        Incorrect format. Use 5 digits, for example 94705.
-    </p>
-    <label for="contract">Contract:</label>
-    <input type="checkbox" id="contract" [(ngModel)]="author.contract" name="contract">
-    <button type="submit" [disabled]="isSubmitting || createForm.invalid">{{ isSubmitting ? 'Creating...' : 'Create Author' }}</button>
-</form>
+<app-author-form
+    [author]="author"
+    mode="create"
+    [isSubmitting]="isSubmitting"
+    [errorMessage]="errorMessage"
+    (save)="createAuthor($event)">
+</app-author-form>

@@ -1,0 +1,115 @@
+:host {
+    display: block;
+}
+
+form {
+    margin: var(--on-space-6) auto;
+    max-width: 760px;
+    padding: var(--on-space-6);
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-lg);
+    background: var(--on-white);
+    box-shadow: var(--on-shadow);
+
+    display: grid;
+    gap: var(--on-space-4);
+}
+
+h2 {
+    margin-bottom: var(--on-space-2);
+    border-bottom: 3px solid var(--on-green);
+    padding-bottom: var(--on-space-3);
+}
+
+.form-error {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #b10e1e;
+    border-radius: var(--on-radius-sm);
+    background: #fbe9ec;
+    color: #7f0820;
+    font-weight: 600;
+}
+
+.field-error {
+    margin: calc(var(--on-space-2) * -1) 0 0;
+    color: #b10e1e;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+label {
+    margin-bottom: calc(var(--on-space-2) * -1);
+    font-weight: 650;
+    color: var(--on-charcoal);
+}
+
+input {
+    width: 100%;
+    min-height: 2.6rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-sm);
+    background: var(--on-white);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus {
+    border-color: var(--on-blue);
+    box-shadow: 0 0 0 3px rgba(33, 121, 183, 0.2);
+}
+
+input.input-invalid {
+    border-color: #b10e1e;
+    box-shadow: 0 0 0 3px rgba(177, 14, 30, 0.16);
+}
+
+input[type='checkbox'] {
+    width: 1.15rem;
+    min-height: 1.15rem;
+    padding: 0;
+    justify-self: start;
+    accent-color: var(--on-green);
+}
+
+.actions {
+    display: flex;
+    gap: var(--on-space-2);
+}
+
+button {
+    width: fit-content;
+    margin-top: var(--on-space-2);
+    padding: 0.65rem 1.2rem;
+    border: 1px solid transparent;
+    border-radius: var(--on-radius-sm);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button[type='submit'] {
+    background: var(--on-blue);
+    color: var(--on-white);
+}
+
+button[type='submit']:hover {
+    background: var(--on-blue-strong);
+}
+
+button[type='submit']:active {
+    background: var(--on-blue-strong);
+}
+
+button[type='submit']:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.button-cancel {
+    background: #dde5eb;
+    color: var(--on-charcoal);
+}
+
+.button-cancel:hover {
+    background: #c9d4dd;
+}

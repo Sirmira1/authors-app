@@ -1,21 +1,17 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthorService, Author } from '../author';
+import { AuthorFormComponent } from '../author-form/author-form';
 
 @Component({
   selector: 'app-author-create',
-  imports: [FormsModule, CommonModule],
+  imports: [AuthorFormComponent],
   templateUrl: './author-create.html',
   styleUrl: './author-create.scss',
 })
 export class AuthorCreateComponent {
   isSubmitting = false;
   errorMessage = '';
-  readonly idPattern = /^\d{3}-\d{2}-\d{4}$/;
-  readonly statePattern = /^[A-Za-z]{2}$/;
-  readonly zipPattern = /^\d{5}$/;
 
   author: Author = {
     au_id: '',
@@ -31,16 +27,11 @@ export class AuthorCreateComponent {
 
   constructor(private authorService: AuthorService, private router: Router) {}
 
-  createAuthor(form: NgForm) : void {
-    if (form.invalid || !this.hasValidAuthorFormat()) {
-      this.errorMessage = 'Please use format: ID 123-45-6789, State 2 letters, Zip 5 digits.';
-      return;
-    }
-
+  createAuthor(authorPayload: Author): void {
     this.errorMessage = '';
     this.isSubmitting = true;
 
-    this.authorService.addAuthor(this.buildAuthorPayload()).subscribe({
+    this.authorService.addAuthor(authorPayload).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.router.navigate(['/authors']);
@@ -51,31 +42,5 @@ export class AuthorCreateComponent {
         console.error('Error creating author', err);
       }
     });
-  }
-
-  private buildAuthorPayload(): Author {
-    return {
-      ...this.author,
-      au_id: this.author.au_id.trim(),
-      au_fname: this.author.au_fname.trim(),
-      au_lname: this.author.au_lname.trim(),
-      phone: this.author.phone.trim(),
-      address: this.author.address.trim(),
-      city: this.author.city.trim(),
-      state: this.author.state.trim().toUpperCase(),
-      zip: this.author.zip.trim(),
-    };
-  }
-
-  private hasValidAuthorFormat(): boolean {
-    return (
-      this.idPattern.test(this.author.au_id.trim()) &&
-      this.statePattern.test(this.author.state.trim()) &&
-      this.zipPattern.test(this.author.zip.trim())
-    );
-  }
-
-  showFieldError(control: NgModel): boolean {
-    return !!(control.invalid && (control.dirty || control.touched));
   }
 }
