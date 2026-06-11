@@ -2,7 +2,7 @@
     display: block;
 }
 
-div {
+.author-list-shell {
     margin: var(--on-space-6) auto;
     width: min(100%, 1500px);
     max-width: 100%;
@@ -64,8 +64,24 @@ h2 {
     color: var(--on-charcoal);
 }
 
+.sort-controls .control-field {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--on-space-2);
+    white-space: nowrap;
+}
+
+.sort-controls .search-field {
+    flex: 1 1 320px;
+    min-width: 320px;
+}
+
+.sort-controls .search-field input[type="search"] {
+    flex: 1 1 auto;
+}
+
 .sort-controls select {
-    min-width: 170px;
+    min-width: 135px;
     padding: 0.4rem 0.55rem;
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-sm);
@@ -74,7 +90,7 @@ h2 {
 }
 
 .sort-controls input[type="search"] {
-    min-width: 240px;
+    min-width: 220px;
     padding: 0.4rem 0.55rem;
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-sm);
@@ -88,6 +104,11 @@ h2 {
     gap: var(--on-space-2);
     flex-wrap: wrap;
     margin-bottom: var(--on-space-4);
+}
+
+.saved-view-controls .rows-per-page-field {
+    margin-left: auto;
+    white-space: nowrap;
 }
 
 .saved-view-controls label {
@@ -142,9 +163,50 @@ table {
     min-width: 1180px;
     margin: 0;
     border-collapse: collapse;
+    table-layout: fixed;
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-md);
     background: var(--on-white);
+}
+
+.col-id {
+    width: 105px;
+}
+
+.col-first-name {
+    width: 110px;
+}
+
+.col-last-name {
+    width: 110px;
+}
+
+.col-phone {
+    width: 110px;
+}
+
+.col-address {
+    width: 140px;
+}
+
+.col-city {
+    width: 95px;
+}
+
+.col-state {
+    width: 65px;
+}
+
+.col-zip {
+    width: 75px;
+}
+
+.col-contract {
+    width: 85px;
+}
+
+.col-actions {
+    width: 250px;
 }
 
 thead th {
@@ -223,13 +285,29 @@ tbody td:nth-child(4) {
     text-align: center;
 }
 
-.contract-cell input[type="checkbox"] {
-    cursor: default;
-    opacity: 1;
-    accent-color: var(--on-green);
-    width: 1.1rem;
-    height: 1.1rem;
-    pointer-events: none;
+.contract-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.contract-indicator.contract-yes {
+    background: #107c10;
+    border-color: #0b5d0b;
+    color: #fff;
+}
+
+.contract-indicator.contract-no {
+    background: #b10e1e;
+    border-color: #8f0b18;
+    color: #fff;
 }
 
 tbody tr:nth-child(even) {
@@ -310,12 +388,18 @@ button:disabled {
 }
 
 @media (max-width: 1100px) {
-    div {
+    .author-list-shell {
         padding: var(--on-space-4);
     }
 
     .sort-controls {
+        align-items: center;
         gap: var(--on-space-2);
+    }
+
+    .sort-controls .control-field {
+        width: auto;
+        justify-content: flex-start;
     }
 
     .sort-controls select {

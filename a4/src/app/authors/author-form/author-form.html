@@ -1,13 +1,13 @@
 <form #authorForm="ngForm" (ngSubmit)="handleSubmit(authorForm)">
     <h2>{{ mode === 'create' ? 'Create Author' : 'Edit Author' }}</h2>
     <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
-    <p #formErrorBanner class="form-error" role="alert" tabindex="-1" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
         {{ errorMessage || localValidationMessage }}
     </p>
 
     <label for="auId">Author ID: <span class="required">*</span></label>
     <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
-    <input type="text" id="auId" [(ngModel)]="formAuthor.au_id" #auIdModel="ngModel" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789" [class.input-invalid]="showFieldError(auIdModel)" readonly>
+    <input type="text" id="auId" [(ngModel)]="formAuthor.au_id" #auIdModel="ngModel" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789" [class.input-invalid]="showFieldError(auIdModel)" disabled>
     <p class="field-error" *ngIf="showFieldError(auIdModel)">Incorrect format. Use 123-45-6789.</p>
 
     <label for="auFname">First Name: <span class="required">*</span></label>

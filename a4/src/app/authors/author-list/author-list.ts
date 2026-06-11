@@ -28,6 +28,7 @@ interface SavedView {
 })
 export class AuthorListComponent implements OnInit {
   private readonly savedViewsKey = 'author-list-saved-views';
+  private readonly manualPageSizeKey = 'author-list-manual-page-size';
   private successMessageTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   @ViewChild('deleteWarningBanner') deleteWarningBanner?: ElementRef<HTMLElement>;
@@ -47,6 +48,9 @@ export class AuthorListComponent implements OnInit {
   sortKey: SortKey = 'au_lname';
   sortDirection: SortDirection = 'asc';
   pageSize = 10;
+  autoFitPageSize = 10;
+  manualPageSize: number | null = null;
+  readonly pageSizeOptions = [5, 10, 15, 20, 25, 50];
   currentPage = 1;
 
   constructor(
@@ -60,13 +64,30 @@ export class AuthorListComponent implements OnInit {
 
   ngOnInit(): void {
     this.consumeSuccessQueryParam();
+    this.loadManualPageSizePreference();
     this.loadSavedViews();
     this.loadAuthors();
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    this.updatePageSizeForViewport();
+    if (this.manualPageSize === null) {
+      this.updatePageSizeForViewport();
+    }
+  }
+
+  onManualPageSizeChange(value: string): void {
+    if (value === 'auto') {
+      this.manualPageSize = null;
+      this.persistManualPageSizePreference();
+      this.updatePageSizeForViewport();
+    } else {
+      this.manualPageSize = Number(value);
+      this.pageSize = this.manualPageSize;
+      this.persistManualPageSizePreference();
+    }
+    this.currentPage = 1;
+    this.ensureCurrentPageInBounds();
   }
 
   loadAuthors() {
@@ -327,7 +348,10 @@ export class AuthorListComponent implements OnInit {
 
   private updatePageSizeForViewport(): void {
     if (!isPlatformBrowser(this.platformId)) {
-      this.pageSize = 10;
+      this.autoFitPageSize = 10;
+      if (this.manualPageSize === null) {
+        this.pageSize = 10;
+      }
       this.ensureCurrentPageInBounds();
       return;
     }
@@ -338,7 +362,10 @@ export class AuthorListComponent implements OnInit {
     const availableForRows = Math.max(viewportHeight - reservedHeight, estimatedRowHeight * 5);
     const computed = Math.floor(availableForRows / estimatedRowHeight);
 
-    this.pageSize = Math.max(5, Math.min(12, computed));
+    this.autoFitPageSize = Math.max(5, Math.min(12, computed));
+    if (this.manualPageSize === null) {
+      this.pageSize = this.autoFitPageSize;
+    }
     this.ensureCurrentPageInBounds();
   }
 
@@ -435,6 +462,46 @@ export class AuthorListComponent implements OnInit {
     } catch {
       this.savedViews = [];
     }
+  }
+
+  private persistManualPageSizePreference(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.manualPageSize === null) {
+      localStorage.removeItem(this.manualPageSizeKey);
+      return;
+    }
+
+    localStorage.setItem(this.manualPageSizeKey, this.manualPageSize.toString());
+  }
+
+  private loadManualPageSizePreference(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const rawValue = localStorage.getItem(this.manualPageSizeKey);
+
+    if (!rawValue) {
+      this.manualPageSize = null;
+      this.updatePageSizeForViewport();
+      return;
+    }
+
+    const parsed = Number(rawValue);
+
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      this.manualPageSize = null;
+      localStorage.removeItem(this.manualPageSizeKey);
+      this.updatePageSizeForViewport();
+      return;
+    }
+
+    this.manualPageSize = parsed;
+    this.pageSize = parsed;
+    this.ensureCurrentPageInBounds();
   }
 
   private escapeRegExp(value: string): string {

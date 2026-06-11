@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Author } from '../author';
 
@@ -10,8 +10,6 @@ import { Author } from '../author';
   styleUrl: './author-form.scss',
 })
 export class AuthorFormComponent implements OnChanges {
-  @ViewChild('formErrorBanner') formErrorBanner?: ElementRef<HTMLElement>;
-
   @Input() author: Author | null = null;
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() isSubmitting = false;
@@ -34,16 +32,11 @@ export class AuthorFormComponent implements OnChanges {
     if (changes['author']) {
       this.formAuthor = this.cloneAuthor(this.author);
     }
-
-    if (changes['errorMessage'] && this.errorMessage) {
-      this.scrollToErrorBanner();
-    }
   }
 
   handleSubmit(form: NgForm): void {
     if (form.invalid || !this.hasValidAuthorFormat()) {
       this.localValidationMessage = this.getDetailedValidationErrors();
-      this.scrollToErrorBanner();
       return;
     }
 
@@ -78,29 +71,8 @@ export class AuthorFormComponent implements OnChanges {
     return !!(control.invalid && (control.dirty || control.touched));
   }
 
-  private scrollToErrorBanner(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    setTimeout(() => {
-      const banner = this.formErrorBanner?.nativeElement;
-
-      if (!banner) {
-        return;
-      }
-
-      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      banner.focus({ preventScroll: true });
-    }, 0);
-  }
-
   private getDetailedValidationErrors(): string {
     const errors: string[] = [];
-
-    if (!this.formAuthor.au_id.trim() || !this.idPattern.test(this.formAuthor.au_id.trim())) {
-      errors.push('Author ID: invalid or missing (expected 123-45-6789)');
-    }
 
     if (!this.formAuthor.au_fname.trim() || !this.namePattern.test(this.formAuthor.au_fname.trim())) {
       errors.push('First name: letters only');

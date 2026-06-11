@@ -47,11 +47,11 @@ export class AuthorEditComponent {
     this.authorService.updateAuthor(authorPayload).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.router.navigate(['/authors'], { queryParams: { success: 'updated' } });
+        this.router.navigate(['/authors']);
       },
       error: err => {
         this.isSubmitting = false;
-        this.errorMessage = err?.error?.error || 'Could not update author. Check field formats and try again.';
+        this.errorMessage = 'Could not update author. Check field formats and try again.';
         console.error('Error updating author', err);
       }
     });
