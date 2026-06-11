@@ -21,6 +21,24 @@ h2 {
     padding-bottom: var(--on-space-3);
 }
 
+.required-note {
+    margin: 0 0 var(--on-space-3) 0;
+    font-size: 0.9rem;
+    color: var(--on-charcoal);
+}
+
+.auto-generated-note {
+    margin: calc(var(--on-space-2) * -1) 0 0.25rem 0;
+    font-size: 0.85rem;
+    color: #666;
+    font-style: italic;
+}
+
+.required {
+    color: #b10e1e;
+    font-weight: 700;
+}
+
 .form-error {
     margin: 0;
     padding: 0.6rem 0.75rem;
@@ -29,6 +47,11 @@ h2 {
     background: #fbe9ec;
     color: #7f0820;
     font-weight: 600;
+}
+
+.form-error:focus-visible {
+    outline: 2px solid #7f0820;
+    outline-offset: 2px;
 }
 
 .field-error {

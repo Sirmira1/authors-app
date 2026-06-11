@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Author } from '../author';
 
@@ -10,6 +10,8 @@ import { Author } from '../author';
   styleUrl: './author-form.scss',
 })
 export class AuthorFormComponent implements OnChanges {
+  @ViewChild('formErrorBanner') formErrorBanner?: ElementRef<HTMLElement>;
+
   @Input() author: Author | null = null;
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() isSubmitting = false;
@@ -21,6 +23,8 @@ export class AuthorFormComponent implements OnChanges {
   readonly idPattern = /^\d{3}-\d{2}-\d{4}$/;
   readonly statePattern = /^[A-Za-z]{2}$/;
   readonly zipPattern = /^\d{5}$/;
+  readonly namePattern = /^[a-zA-Z\s'-]*$/;
+  readonly phoneCleanPattern = /\D/g;
 
   localValidationMessage = '';
 
@@ -30,12 +34,16 @@ export class AuthorFormComponent implements OnChanges {
     if (changes['author']) {
       this.formAuthor = this.cloneAuthor(this.author);
     }
+
+    if (changes['errorMessage'] && this.errorMessage) {
+      this.scrollToErrorBanner();
+    }
   }
 
   handleSubmit(form: NgForm): void {
     if (form.invalid || !this.hasValidAuthorFormat()) {
-      this.localValidationMessage =
-        'Please fix invalid fields. Format: ID 123-45-6789, State 2 letters, Zip 5 digits.';
+      this.localValidationMessage = this.getDetailedValidationErrors();
+      this.scrollToErrorBanner();
       return;
     }
 
@@ -43,15 +51,94 @@ export class AuthorFormComponent implements OnChanges {
     this.save.emit(this.buildAuthorPayload());
   }
 
+  formatPhoneNumber(event: any): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(this.phoneCleanPattern, '');
+
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+
+    let formatted = '';
+    if (value.length > 0) {
+      formatted = value.slice(0, 3);
+    }
+    if (value.length > 3) {
+      formatted += '-' + value.slice(3, 6);
+    }
+    if (value.length > 6) {
+      formatted += '-' + value.slice(6, 10);
+    }
+
+    this.formAuthor.phone = formatted;
+    input.value = formatted;
+  }
+
   showFieldError(control: NgModel): boolean {
     return !!(control.invalid && (control.dirty || control.touched));
+  }
+
+  private scrollToErrorBanner(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    setTimeout(() => {
+      const banner = this.formErrorBanner?.nativeElement;
+
+      if (!banner) {
+        return;
+      }
+
+      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      banner.focus({ preventScroll: true });
+    }, 0);
+  }
+
+  private getDetailedValidationErrors(): string {
+    const errors: string[] = [];
+
+    if (!this.formAuthor.au_id.trim() || !this.idPattern.test(this.formAuthor.au_id.trim())) {
+      errors.push('Author ID: invalid or missing (expected 123-45-6789)');
+    }
+
+    if (!this.formAuthor.au_fname.trim() || !this.namePattern.test(this.formAuthor.au_fname.trim())) {
+      errors.push('First name: letters only');
+    }
+    if (!this.formAuthor.au_lname.trim() || !this.namePattern.test(this.formAuthor.au_lname.trim())) {
+      errors.push('Last name: letters only');
+    }
+    if (!this.formAuthor.phone.trim() || !/^\d{3}-\d{3}-\d{4}$/.test(this.formAuthor.phone.trim())) {
+      errors.push('Phone: 000-000-0000 format');
+    }
+    if (!this.formAuthor.address.trim()) {
+      errors.push('Address: required');
+    }
+    if (!this.formAuthor.city.trim()) {
+      errors.push('City: required');
+    }
+    if (!this.formAuthor.state.trim() || !this.statePattern.test(this.formAuthor.state.trim())) {
+      errors.push('State: 2 letters');
+    }
+    if (!this.formAuthor.zip.trim() || !this.zipPattern.test(this.formAuthor.zip.trim())) {
+      errors.push('Zip: 5 digits');
+    }
+
+    return errors.length > 0 ? 'Fix these errors: ' + errors.join(', ') + '.' : 'Please fix all required fields.';
   }
 
   private hasValidAuthorFormat(): boolean {
     return (
       this.idPattern.test(this.formAuthor.au_id.trim()) &&
       this.statePattern.test(this.formAuthor.state.trim()) &&
-      this.zipPattern.test(this.formAuthor.zip.trim())
+      this.zipPattern.test(this.formAuthor.zip.trim()) &&
+      this.namePattern.test(this.formAuthor.au_fname.trim()) &&
+      this.namePattern.test(this.formAuthor.au_lname.trim()) &&
+      this.formAuthor.au_fname.trim().length > 0 &&
+      this.formAuthor.au_lname.trim().length > 0 &&
+      /^\d{3}-\d{3}-\d{4}$/.test(this.formAuthor.phone.trim()) &&
+      this.formAuthor.address.trim().length > 0 &&
+      this.formAuthor.city.trim().length > 0
     );
   }
 

@@ -4,12 +4,14 @@
 
 div {
     margin: var(--on-space-6) auto;
-    max-width: 1200px;
-    padding: var(--on-space-6);
+    width: min(100%, 1500px);
+    max-width: 100%;
+    padding: var(--on-space-6) var(--on-space-1);
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-lg);
     background: var(--on-white);
     box-shadow: var(--on-shadow);
+    box-sizing: border-box;
 }
 
 h2 {
@@ -19,29 +21,215 @@ h2 {
     border-bottom: 3px solid var(--on-green);
 }
 
+.delete-warning {
+    margin: 0 0 var(--on-space-4) 0;
+    padding: var(--on-space-3) var(--on-space-4);
+    border: 1px solid #f3b3b3;
+    border-radius: var(--on-radius-sm);
+    background: #fff4f4;
+    color: #8f1f1f;
+    font-weight: 600;
+}
+
+.success-banner {
+    margin: 0 0 var(--on-space-4) 0;
+    padding: var(--on-space-3) var(--on-space-4);
+    border: 1px solid #8bc48b;
+    border-radius: var(--on-radius-sm);
+    background: #edf9ed;
+    color: #0f5b17;
+    font-weight: 600;
+}
+
+.success-banner:focus-visible {
+    outline: 2px solid #0f5b17;
+    outline-offset: 2px;
+}
+
+.delete-warning:focus-visible {
+    outline: 2px solid #8f1f1f;
+    outline-offset: 2px;
+}
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--on-space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--on-space-4);
+}
+
+.sort-controls label {
+    font-weight: 600;
+    color: var(--on-charcoal);
+}
+
+.sort-controls select {
+    min-width: 170px;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-sm);
+    background: #f9fbfd;
+    color: var(--on-charcoal);
+}
+
+.sort-controls input[type="search"] {
+    min-width: 240px;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-sm);
+    background: #f9fbfd;
+    color: var(--on-charcoal);
+}
+
+.saved-view-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--on-space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--on-space-4);
+}
+
+.saved-view-controls label {
+    font-weight: 600;
+    color: var(--on-charcoal);
+}
+
+.saved-view-controls select,
+.saved-view-controls input[type="text"] {
+    min-width: 190px;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-sm);
+    background: #f9fbfd;
+    color: var(--on-charcoal);
+}
+
+.rows-fit-note {
+    margin: 0;
+    font-weight: 600;
+    color: #3b4a57;
+}
+
+.pagination {
+    margin-top: var(--on-space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--on-space-3);
+    flex-wrap: wrap;
+}
+
+.pagination-status {
+    margin: 0;
+    color: var(--on-charcoal);
+    font-weight: 600;
+}
+
+.pagination-actions {
+    display: flex;
+    gap: var(--on-space-2);
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 table {
     width: 100%;
+    min-width: 1180px;
+    margin: 0;
     border-collapse: collapse;
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-md);
-    overflow: hidden;
     background: var(--on-white);
 }
 
 thead th {
-    padding: var(--on-space-3) var(--on-space-4);
+    padding: 0.55rem 0.7rem;
     text-align: left;
     font-weight: 700;
+    font-size: 0.95rem;
     color: var(--on-white);
     background: var(--on-charcoal);
     border-bottom: 3px solid var(--on-green);
     white-space: nowrap;
 }
 
+.sortable-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 0.2rem;
+    transition: color 0.15s ease;
+}
+
+.sortable-header:hover,
+.sortable-header:focus-visible {
+    color: #cae5ff;
+}
+
+.sortable-header:focus-visible {
+    outline: 2px solid #cae5ff;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+.sortable-header.active {
+    text-decoration-style: solid;
+}
+
+.sort-indicator {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+:host ::ng-deep mark {
+    background: #fff3a3;
+    color: inherit;
+    padding: 0 0.12rem;
+    border-radius: 2px;
+}
+
 tbody td {
-    padding: var(--on-space-3) var(--on-space-4);
+    padding: 0.45rem 0.7rem;
+    font-size: 0.93rem;
+    line-height: 1.25;
     border-bottom: 1px solid #dde5eb;
-    vertical-align: top;
+    vertical-align: middle;
+    white-space: normal;
+}
+
+thead th:nth-child(1),
+thead th:nth-child(4),
+tbody td:nth-child(1),
+tbody td:nth-child(4) {
+    white-space: nowrap;
+}
+
+.empty-state {
+    text-align: center;
+    font-style: italic;
+    color: #4f5e69;
+    white-space: normal;
+}
+
+.contract-cell {
+    text-align: center;
+}
+
+.contract-cell input[type="checkbox"] {
+    cursor: default;
+    opacity: 1;
+    accent-color: var(--on-green);
+    width: 1.1rem;
+    height: 1.1rem;
+    pointer-events: none;
 }
 
 tbody tr:nth-child(even) {
@@ -53,17 +241,32 @@ tbody tr:hover {
 }
 
 td:last-child {
-    min-width: 360px;
+    min-width: 250px;
+}
+
+.actions-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem !important;
+    white-space: normal !important;
+}
+
+.actions-cell button {
+    width: 100%;
+    margin: 0 !important;
+    display: block;
 }
 
 button {
-    margin: 0 var(--on-space-2) var(--on-space-2) 0;
-    padding: 0.55rem 0.85rem;
+    margin: 0 0.35rem 0.25rem 0;
+    padding: 0.4rem 0.62rem;
     border: 1px solid transparent;
     border-radius: var(--on-radius-sm);
     background: var(--on-blue);
     color: var(--on-white);
+    font-size: 0.85rem;
     font-weight: 600;
+    line-height: 1.2;
     cursor: pointer;
     transition: background-color 0.15s ease, transform 0.08s ease;
 }
@@ -90,14 +293,49 @@ button:disabled {
     opacity: 0.5;
 }
 
+.secondary-btn {
+    background: #6a7b8b;
+}
+
+.secondary-btn:hover {
+    background: #566777;
+}
+
+.danger-btn {
+    background: #b75a5a;
+}
+
+.danger-btn:hover {
+    background: #974848;
+}
+
 @media (max-width: 1100px) {
     div {
         padding: var(--on-space-4);
     }
 
+    .sort-controls {
+        gap: var(--on-space-2);
+    }
+
+    .sort-controls select {
+        min-width: 140px;
+    }
+
+    .sort-controls input[type="search"] {
+        min-width: 200px;
+    }
+
     table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
+        min-width: 940px;
+    }
+
+    .saved-view-controls select,
+    .saved-view-controls input[type="text"] {
+        min-width: 160px;
+    }
+
+    .pagination {
+        align-items: flex-start;
     }
 }

@@ -18,7 +18,7 @@ import { SiteFooterComponent } from './layout/site-footer/site-footer';
   styles: [
     `
       .gov-main {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 1rem;
       }

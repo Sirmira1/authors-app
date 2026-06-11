@@ -63,6 +63,26 @@ function validateAuthorPayload(author, options = { includeId: true }) {
   return null;
 }
 
+async function findDuplicateAuthor({ au_id, phone, excludeId = null }) {
+  if (!pool) {
+    return null;
+  }
+
+  const request = pool.request()
+    .input("au_id", sql.VarChar(11), au_id)
+    .input("phone", sql.Char(12), phone);
+
+  let query = "SELECT TOP 1 au_id, phone FROM authors WHERE (au_id = @au_id OR phone = @phone)";
+
+  if (excludeId) {
+    request.input("exclude_id", sql.VarChar(11), excludeId);
+    query += " AND au_id <> @exclude_id";
+  }
+
+  const result = await request.query(query);
+  return result.recordset[0] || null;
+}
+
 // connect
 async function connectToDatabase() {
   try {
@@ -95,6 +115,41 @@ app.get("/api/authors", async (req, res) => {
   } catch (err) {
     console.error('Error fetching authors:', err);
     res.status(500).json({ error: 'Failed to fetch authors' });
+  }
+});
+
+// generate unique author id
+app.get("/api/authors/generate/id", async (req, res) => {
+  try {
+    if (!pool) {
+      return res.status(500).json({ error: 'Database connection not established' });
+    }
+    
+    let uniqueId = null;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    while (!uniqueId && attempts < maxAttempts) {
+      const random1 = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const random2 = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+      const random3 = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      const candidateId = `${random1}-${random2}-${random3}`;
+      
+      const result = await pool.request().input("au_id", sql.VarChar(11), candidateId).query('SELECT * FROM authors WHERE au_id = @au_id');
+      if (result.recordset.length === 0) {
+        uniqueId = candidateId;
+      }
+      attempts++;
+    }
+    
+    if (!uniqueId) {
+      return res.status(500).json({ error: 'Could not generate a unique author ID after multiple attempts' });
+    }
+    
+    res.json({ au_id: uniqueId });
+  } catch (err) {
+    console.error('Error generating author id:', err);
+    res.status(500).json({ error: 'Failed to generate author id' });
   }
 });
 
@@ -131,6 +186,18 @@ app.post("/api/authors", async (req, res) => {
     if (validationError) {
       return res.status(400).json({ error: validationError });
     }
+
+    const duplicate = await findDuplicateAuthor({ au_id: author.au_id, phone: author.phone });
+    if (duplicate) {
+      if (duplicate.au_id === author.au_id) {
+        return res.status(409).json({ error: 'Duplicate author ID. An author with this ID already exists.' });
+      }
+
+      if (duplicate.phone === author.phone) {
+        return res.status(409).json({ error: 'Duplicate phone number. An author with this phone number already exists.' });
+      }
+    }
+
     await pool.request()
       .input("au_id", sql.VarChar(11), author.au_id)
       .input("au_lname", sql.VarChar(40), author.au_lname)
@@ -145,6 +212,9 @@ app.post("/api/authors", async (req, res) => {
     res.status(201).json({ message: 'Author created successfully' });
   } catch (err) {
     console.error('Error creating author:', err);
+    if (err?.number === 2627 || err?.number === 2601) {
+      return res.status(409).json({ error: 'Duplicate author ID or phone number detected.' });
+    }
     res.status(500).json({ error: 'Failed to create author' });
   }
 });
@@ -167,6 +237,11 @@ app.put("/api/authors/:id", async (req, res) => {
       return res.status(400).json({ error: validationError });
     }
 
+    const duplicate = await findDuplicateAuthor({ au_id: id, phone: author.phone, excludeId: id });
+    if (duplicate && duplicate.phone === author.phone) {
+      return res.status(409).json({ error: 'Duplicate phone number. An author with this phone number already exists.' });
+    }
+
     const result = await pool.request()
       .input("au_id", sql.VarChar(11), id)
       .input("au_lname", sql.VarChar(40), author.au_lname)
@@ -184,6 +259,9 @@ app.put("/api/authors/:id", async (req, res) => {
     res.json({ message: 'Author updated successfully' });
   } catch (err) {
     console.error('Error updating author:', err);
+    if (err?.number === 2627 || err?.number === 2601) {
+      return res.status(409).json({ error: 'Duplicate author ID or phone number detected.' });
+    }
     res.status(500).json({ error: 'Failed to update author' });
   }
 });
@@ -205,6 +283,9 @@ app.delete("/api/authors/:id", async (req, res) => {
     res.json({ message: 'Author deleted successfully' });
   } catch (err) {
     console.error('Error deleting author:', err);
+    if (err?.number === 547 || err?.originalError?.info?.number === 547) {
+      return res.status(409).json({ error: 'Cannot delete this author because they are linked to one or more books.' });
+    }
     res.status(500).json({ error: 'Failed to delete author' });
   }
 });

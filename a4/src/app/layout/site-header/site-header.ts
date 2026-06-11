@@ -43,7 +43,7 @@ import { RouterLink } from '@angular/router';
       }
 
       .gov-header__brand-wrap {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         display: flex;
         align-items: center;
@@ -110,7 +110,7 @@ import { RouterLink } from '@angular/router';
       }
 
       .gov-nav {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 0.65rem 1.25rem;
         display: flex;

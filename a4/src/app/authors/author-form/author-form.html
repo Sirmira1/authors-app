@@ -1,33 +1,38 @@
 <form #authorForm="ngForm" (ngSubmit)="handleSubmit(authorForm)">
     <h2>{{ mode === 'create' ? 'Create Author' : 'Edit Author' }}</h2>
-    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+    <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
+    <p #formErrorBanner class="form-error" role="alert" tabindex="-1" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
         {{ errorMessage || localValidationMessage }}
     </p>
 
-    <label for="auId">Author ID:</label>
-    <input type="text" id="auId" [(ngModel)]="formAuthor.au_id" #auIdModel="ngModel" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789" [class.input-invalid]="showFieldError(auIdModel)">
+    <label for="auId">Author ID: <span class="required">*</span></label>
+    <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
+    <input type="text" id="auId" [(ngModel)]="formAuthor.au_id" #auIdModel="ngModel" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789" [class.input-invalid]="showFieldError(auIdModel)" readonly>
     <p class="field-error" *ngIf="showFieldError(auIdModel)">Incorrect format. Use 123-45-6789.</p>
 
-    <label for="auFname">First Name:</label>
-    <input type="text" id="auFname" [(ngModel)]="formAuthor.au_fname" #auFnameModel="ngModel" name="au_fname" required placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)">
+    <label for="auFname">First Name: <span class="required">*</span></label>
+    <input type="text" id="auFname" [(ngModel)]="formAuthor.au_fname" #auFnameModel="ngModel" name="au_fname" required pattern="^[a-zA-Z\s'-]+$" placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)">
+    <p class="field-error" *ngIf="showFieldError(auFnameModel)">First name must contain only letters, spaces, hyphens, and apostrophes.</p>
 
-    <label for="auLname">Last Name:</label>
-    <input type="text" id="auLname" [(ngModel)]="formAuthor.au_lname" #auLnameModel="ngModel" name="au_lname" required placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)">
+    <label for="auLname">Last Name: <span class="required">*</span></label>
+    <input type="text" id="auLname" [(ngModel)]="formAuthor.au_lname" #auLnameModel="ngModel" name="au_lname" required pattern="^[a-zA-Z\s'-]+$" placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)">
+    <p class="field-error" *ngIf="showFieldError(auLnameModel)">Last name must contain only letters, spaces, hyphens, and apostrophes.</p>
 
-    <label for="phone">Phone:</label>
-    <input type="text" id="phone" [(ngModel)]="formAuthor.phone" #phoneModel="ngModel" name="phone" required placeholder="e.g. 415 658-9932" [class.input-invalid]="showFieldError(phoneModel)">
+    <label for="phone">Phone: <span class="required">*</span></label>
+    <input type="text" id="phone" [(ngModel)]="formAuthor.phone" #phoneModel="ngModel" name="phone" required placeholder="000-000-0000" inputmode="numeric" (input)="formatPhoneNumber($event)" title="Phone number format: 000-000-0000" [class.input-invalid]="showFieldError(phoneModel)">
+    <p class="field-error" *ngIf="showFieldError(phoneModel)">Phone must be in format 000-000-0000.</p>
 
-    <label for="address">Address:</label>
+    <label for="address">Address: <span class="required">*</span></label>
     <input type="text" id="address" [(ngModel)]="formAuthor.address" #addressModel="ngModel" name="address" required placeholder="e.g. 55 Hillsdale Bl." [class.input-invalid]="showFieldError(addressModel)">
 
-    <label for="city">City:</label>
+    <label for="city">City: <span class="required">*</span></label>
     <input type="text" id="city" [(ngModel)]="formAuthor.city" #cityModel="ngModel" name="city" required placeholder="e.g. Berkeley" [class.input-invalid]="showFieldError(cityModel)">
 
-    <label for="state">State:</label>
+    <label for="state">State: <span class="required">*</span></label>
     <input type="text" id="state" [(ngModel)]="formAuthor.state" #stateModel="ngModel" name="state" required pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like CA" placeholder="CA" [class.input-invalid]="showFieldError(stateModel)">
     <p class="field-error" *ngIf="showFieldError(stateModel)">Incorrect format. Use a 2-letter code, for example CA.</p>
 
-    <label for="zip">Zip:</label>
+    <label for="zip">Zip: <span class="required">*</span></label>
     <input type="text" id="zip" [(ngModel)]="formAuthor.zip" #zipModel="ngModel" name="zip" required pattern="^\d{5}$" maxlength="5" inputmode="numeric" title="Use 5-digit zip code" placeholder="94705" [class.input-invalid]="showFieldError(zipModel)">
     <p class="field-error" *ngIf="showFieldError(zipModel)">Incorrect format. Use 5 digits, for example 94705.</p>
 

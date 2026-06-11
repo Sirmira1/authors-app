@@ -1,37 +1,151 @@
 <div>
     <h2>Authors List</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Zip</th>
-                <th>Contract</th>
+    <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
+    <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <div class="sort-controls">
+        <label for="authorSearch">Search</label>
+        <input id="authorSearch" type="search" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search any author field" aria-label="Search authors by any column">
+
+        <label for="cityFilter">City</label>
+        <select id="cityFilter" [ngModel]="cityFilter" (ngModelChange)="onCityFilterChange($event)">
+            <option value="">All cities</option>
+            <option *ngFor="let city of cityOptions" [value]="city">{{ city }}</option>
+        </select>
+
+        <label for="stateFilter">State</label>
+        <select id="stateFilter" [ngModel]="stateFilter" (ngModelChange)="onStateFilterChange($event)">
+            <option value="">All states</option>
+            <option *ngFor="let state of stateOptions" [value]="state">{{ state }}</option>
+        </select>
+
+        <label for="contractFilter">Contract</label>
+        <select id="contractFilter" [ngModel]="contractFilter" (ngModelChange)="onContractFilterChange($event)">
+            <option value="all">All</option>
+            <option value="yes">Contracted</option>
+            <option value="no">Not contracted</option>
+        </select>
+
+        <label for="sortKey">Sort by</label>
+        <select id="sortKey" [ngModel]="sortKey" (ngModelChange)="onSortSelectionChange($event)">
+            <option value="au_id">ID</option>
+            <option value="au_fname">First Name</option>
+            <option value="au_lname">Last Name</option>
+            <option value="phone">Phone</option>
+            <option value="address">Address</option>
+            <option value="city">City</option>
+            <option value="state">State</option>
+            <option value="zip">Zip</option>
+            <option value="contract">Contract</option>
+        </select>
+
+        <label for="sortDirection">Order</label>
+        <select id="sortDirection" [ngModel]="sortDirection" (ngModelChange)="onSortDirectionChange($event)">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+
+        <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
+
+        <p class="rows-fit-note">Rows per page auto-fit: {{ pageSize }}</p>
+    </div>
+
+    <div class="saved-view-controls">
+        <label for="savedViewSelect">Saved views</label>
+        <select id="savedViewSelect" [ngModel]="selectedSavedViewName" (ngModelChange)="onSavedViewSelectionChange($event)">
+            <option value="">Select a saved view</option>
+            <option *ngFor="let view of savedViews" [value]="view.name">{{ view.name }}</option>
+        </select>
+        <button type="button" class="secondary-btn" (click)="applySavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Apply</button>
+        <button type="button" class="danger-btn" (click)="deleteSavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Delete</button>
+
+        <input type="text" [ngModel]="newSavedViewName" (ngModelChange)="newSavedViewName = $event" placeholder="New view name" aria-label="Name for saved view">
+        <button type="button" (click)="saveCurrentView()" [disabled]="!newSavedViewName.trim()">Save Current View</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('au_id')" role="button" tabindex="0" (click)="sortByHeader('au_id')" (keydown.enter)="sortByHeader('au_id')" (keydown.space)="sortByHeader('au_id'); $event.preventDefault()">
+                        ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('au_id') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('au_fname')" role="button" tabindex="0" (click)="sortByHeader('au_fname')" (keydown.enter)="sortByHeader('au_fname')" (keydown.space)="sortByHeader('au_fname'); $event.preventDefault()">
+                        First Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('au_fname') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('au_lname')" role="button" tabindex="0" (click)="sortByHeader('au_lname')" (keydown.enter)="sortByHeader('au_lname')" (keydown.space)="sortByHeader('au_lname'); $event.preventDefault()">
+                        Last Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('au_lname') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('phone')" role="button" tabindex="0" (click)="sortByHeader('phone')" (keydown.enter)="sortByHeader('phone')" (keydown.space)="sortByHeader('phone'); $event.preventDefault()">
+                        Phone <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('phone') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('address')" role="button" tabindex="0" (click)="sortByHeader('address')" (keydown.enter)="sortByHeader('address')" (keydown.space)="sortByHeader('address'); $event.preventDefault()">
+                        Address <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('address') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('city')" role="button" tabindex="0" (click)="sortByHeader('city')" (keydown.enter)="sortByHeader('city')" (keydown.space)="sortByHeader('city'); $event.preventDefault()">
+                        City <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('city') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('state')" role="button" tabindex="0" (click)="sortByHeader('state')" (keydown.enter)="sortByHeader('state')" (keydown.space)="sortByHeader('state'); $event.preventDefault()">
+                        State <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('state') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('zip')" role="button" tabindex="0" (click)="sortByHeader('zip')" (keydown.enter)="sortByHeader('zip')" (keydown.space)="sortByHeader('zip'); $event.preventDefault()">
+                        Zip <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('zip') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('contract')" role="button" tabindex="0" (click)="sortByHeader('contract')" (keydown.enter)="sortByHeader('contract')" (keydown.space)="sortByHeader('contract'); $event.preventDefault()">
+                        Contract <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('contract') }}</span>
+                    </span>
+                </th>
                 <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let author of authors">
-                <td>{{ author.au_id }}</td>
-                <td>{{ author.au_fname }}</td>
-                <td>{{ author.au_lname }}</td>
-                <td>{{ author.phone }}</td>
-                <td>{{ author.address }}</td>
-                <td>{{ author.city }}</td>
-                <td>{{ author.state }}</td>
-                <td>{{ author.zip }}</td>
-                <td>{{ author.contract }}</td>
-                <td>
-                    <button [routerLink]="author.au_id ? ['/authors', author.au_id] : ['/authors']" [disabled]="!author.au_id">View Author Details</button>
-                    <button [routerLink]="author.au_id ? ['/authors/edit', author.au_id] : ['/authors']" [disabled]="!author.au_id">Edit Author</button>
-                    <button (click)="deleteAuthor(author.au_id)" [disabled]="!author.au_id">Delete Author</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let author of pagedAuthors; trackBy: trackByAuthorId">
+                    <td><span [innerHTML]="getHighlightedText(author.au_id)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.au_fname)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.au_lname)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.phone)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.address)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.city)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.state)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(author.zip)"></span></td>
+                    <td class="contract-cell"><input type="checkbox" [checked]="author.contract" (change)="$event.preventDefault()" (click)="$event.preventDefault()"></td>
+                    <td class="actions-cell">
+                        <button [routerLink]="author.au_id ? ['/authors', author.au_id] : ['/authors']" [disabled]="!author.au_id">View Author Details</button>
+                        <button [routerLink]="author.au_id ? ['/authors/edit', author.au_id] : ['/authors']" [disabled]="!author.au_id">Edit Author</button>
+                        <button (click)="deleteAuthor(author.au_id)" [disabled]="!author.au_id">Delete Author</button>
+                    </td>
+                </tr>
+                <tr *ngIf="pagedAuthors.length === 0">
+                    <td colspan="10" class="empty-state">No authors found with the current filters.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" role="navigation" aria-label="Author list pages">
+        <p class="pagination-status" aria-live="polite">
+            Showing {{ pageStartItem }}-{{ pageEndItem }} of {{ viewAuthors.length }}
+            | Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="pagination-actions">
+            <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
+    </div>
 </div>

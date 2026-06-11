@@ -42,4 +42,8 @@ export class AuthorService {
   deleteAuthor(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+  // generate unique id
+  generateAuthorId(): Observable<{ au_id: string }> {
+    return this.http.get<{ au_id: string }>(`${this.apiUrl}/generate/id`);
+  }
 }
