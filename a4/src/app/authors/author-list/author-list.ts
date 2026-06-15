@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Inject, PLATFORM_ID, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Inject, NgZone, PLATFORM_ID, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -42,6 +42,12 @@ export class AuthorListComponent implements OnInit {
   cityFilter = '';
   stateFilter = '';
   contractFilter: ContractFilter = 'all';
+  draftSearchTerm = '';
+  draftCityFilter = '';
+  draftStateFilter = '';
+  draftContractFilter: ContractFilter = 'all';
+  draftSortKey: SortKey = 'au_lname';
+  draftSortDirection: SortDirection = 'asc';
   savedViews: SavedView[] = [];
   selectedSavedViewName = '';
   newSavedViewName = '';
@@ -57,6 +63,7 @@ export class AuthorListComponent implements OnInit {
     private authorService: AuthorService,
     private route: ActivatedRoute,
     private router: Router,
+    private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: object
   ) {
     this.updatePageSizeForViewport();
@@ -93,9 +100,11 @@ export class AuthorListComponent implements OnInit {
   loadAuthors() {
     this.authorService.getAuthors().subscribe({
       next: authors => {
-        this.authors = authors;
-        this.recomputeViewAuthors();
-        this.ensureCurrentPageInBounds();
+        this.ngZone.run(() => {
+          this.authors = authors;
+          this.recomputeViewAuthors();
+          this.ensureCurrentPageInBounds();
+        });
       },
       error: err => console.error('Error loading authors', err)
     });
@@ -111,11 +120,13 @@ export class AuthorListComponent implements OnInit {
       this.deleteWarning = null;
       this.authorService.deleteAuthor(id).subscribe({
         next: () => {
-          this.deleteWarning = null;
-          this.authors = this.authors.filter(author => author.au_id !== id);
-          this.recomputeViewAuthors();
-          this.ensureCurrentPageInBounds();
-          this.setSuccessMessage('Author deleted successfully.');
+          this.ngZone.run(() => {
+            this.deleteWarning = null;
+            this.authors = this.authors.filter(author => author.au_id !== id);
+            this.recomputeViewAuthors();
+            this.ensureCurrentPageInBounds();
+            this.setSuccessMessage('Author deleted successfully.');
+          });
         },
         error: (err: HttpErrorResponse) => {
           if (err.status === 409) {
@@ -132,47 +143,23 @@ export class AuthorListComponent implements OnInit {
     }
   }
 
-  onSortSelectionChange(sortKey: SortKey): void {
-    this.sortKey = sortKey;
-    this.recomputeViewAuthors();
-    this.currentPage = 1;
-  }
-
-  onSortDirectionChange(direction: SortDirection): void {
-    this.sortDirection = direction;
-    this.recomputeViewAuthors();
-    this.currentPage = 1;
-  }
-
-  onSearchTermChange(term: string): void {
-    this.searchTerm = term;
-    this.recomputeViewAuthors();
-    this.currentPage = 1;
-    this.ensureCurrentPageInBounds();
-  }
-
-  onCityFilterChange(city: string): void {
-    this.cityFilter = city;
-    this.recomputeViewAuthors();
-    this.currentPage = 1;
-    this.ensureCurrentPageInBounds();
-  }
-
-  onStateFilterChange(state: string): void {
-    this.stateFilter = state;
-    this.recomputeViewAuthors();
-    this.currentPage = 1;
-    this.ensureCurrentPageInBounds();
-  }
-
-  onContractFilterChange(filter: ContractFilter): void {
-    this.contractFilter = filter;
+  applySearch(): void {
+    this.searchTerm = this.draftSearchTerm;
+    this.cityFilter = this.draftCityFilter;
+    this.stateFilter = this.draftStateFilter;
+    this.contractFilter = this.draftContractFilter;
+    this.sortKey = this.draftSortKey;
+    this.sortDirection = this.draftSortDirection;
     this.recomputeViewAuthors();
     this.currentPage = 1;
     this.ensureCurrentPageInBounds();
   }
 
   clearFilters(): void {
+    this.draftSearchTerm = '';
+    this.draftCityFilter = '';
+    this.draftStateFilter = '';
+    this.draftContractFilter = 'all';
     this.searchTerm = '';
     this.cityFilter = '';
     this.stateFilter = '';
@@ -222,6 +209,12 @@ export class AuthorListComponent implements OnInit {
     this.contractFilter = selectedView.contract;
     this.sortKey = selectedView.sortKey;
     this.sortDirection = selectedView.sortDirection;
+    this.draftSearchTerm = selectedView.searchTerm;
+    this.draftCityFilter = selectedView.city;
+    this.draftStateFilter = selectedView.state;
+    this.draftContractFilter = selectedView.contract;
+    this.draftSortKey = selectedView.sortKey;
+    this.draftSortDirection = selectedView.sortDirection;
     this.recomputeViewAuthors();
     this.currentPage = 1;
     this.ensureCurrentPageInBounds();
@@ -271,13 +264,13 @@ export class AuthorListComponent implements OnInit {
   sortByHeader(sortKey: SortKey): void {
     if (this.sortKey === sortKey) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-      this.recomputeViewAuthors();
-      this.currentPage = 1;
-      return;
+    } else {
+      this.sortKey = sortKey;
+      this.sortDirection = 'asc';
     }
 
-    this.sortKey = sortKey;
-    this.sortDirection = 'asc';
+    this.draftSortKey = this.sortKey;
+    this.draftSortDirection = this.sortDirection;
     this.recomputeViewAuthors();
     this.currentPage = 1;
   }

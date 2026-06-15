@@ -11,11 +11,11 @@
     <p class="field-error" *ngIf="showFieldError(auIdModel)">Incorrect format. Use 123-45-6789.</p>
 
     <label for="auFname">First Name: <span class="required">*</span></label>
-    <input type="text" id="auFname" [(ngModel)]="formAuthor.au_fname" #auFnameModel="ngModel" name="au_fname" required pattern="^[a-zA-Z\s'-]+$" placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)">
+    <input type="text" id="auFname" [(ngModel)]="formAuthor.au_fname" #auFnameModel="ngModel" name="au_fname" required pattern="^[a-zA-Z\s'-]+$" maxlength="20" placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)">
     <p class="field-error" *ngIf="showFieldError(auFnameModel)">First name must contain only letters, spaces, hyphens, and apostrophes.</p>
 
     <label for="auLname">Last Name: <span class="required">*</span></label>
-    <input type="text" id="auLname" [(ngModel)]="formAuthor.au_lname" #auLnameModel="ngModel" name="au_lname" required pattern="^[a-zA-Z\s'-]+$" placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)">
+    <input type="text" id="auLname" [(ngModel)]="formAuthor.au_lname" #auLnameModel="ngModel" name="au_lname" required pattern="^[a-zA-Z\s'-]+$" maxlength="40" placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)">
     <p class="field-error" *ngIf="showFieldError(auLnameModel)">Last name must contain only letters, spaces, hyphens, and apostrophes.</p>
 
     <label for="phone">Phone: <span class="required">*</span></label>
@@ -23,10 +23,18 @@
     <p class="field-error" *ngIf="showFieldError(phoneModel)">Phone must be in format 000-000-0000.</p>
 
     <label for="address">Address: <span class="required">*</span></label>
-    <input type="text" id="address" [(ngModel)]="formAuthor.address" #addressModel="ngModel" name="address" required placeholder="e.g. 55 Hillsdale Bl." [class.input-invalid]="showFieldError(addressModel)">
+    <div class="address-autocomplete">
+        <input type="text" id="address" [ngModel]="formAuthor.address" (ngModelChange)="onAddressInput($event)" (blur)="hideAddressSuggestions()" #addressModel="ngModel" name="address" required maxlength="40" autocomplete="off" placeholder="Start typing a Canadian address" [class.input-invalid]="showFieldError(addressModel)">
+        <ul class="address-suggestions" *ngIf="showAddressSuggestions">
+            <li *ngFor="let suggestion of addressSuggestions" (mousedown)="selectAddressSuggestion(suggestion)">
+                {{ suggestion.label }}
+            </li>
+        </ul>
+    </div>
 
     <label for="city">City: <span class="required">*</span></label>
-    <input type="text" id="city" [(ngModel)]="formAuthor.city" #cityModel="ngModel" name="city" required placeholder="e.g. Berkeley" [class.input-invalid]="showFieldError(cityModel)">
+    <input type="text" id="city" [(ngModel)]="formAuthor.city" #cityModel="ngModel" name="city" required pattern="^[a-zA-Z\s'.-]+$" maxlength="20" title="City must contain only letters" placeholder="e.g. Berkeley" [class.input-invalid]="showFieldError(cityModel)">
+    <p class="field-error" *ngIf="showFieldError(cityModel)">City must contain only letters, spaces, hyphens, apostrophes, and periods (no numbers).</p>
 
     <label for="state">State: <span class="required">*</span></label>
     <input type="text" id="state" [(ngModel)]="formAuthor.state" #stateModel="ngModel" name="state" required pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like CA" placeholder="CA" [class.input-invalid]="showFieldError(stateModel)">

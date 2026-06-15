@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthorService, Author } from '../author';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,7 +19,8 @@ export class AuthorEditComponent {
   constructor(
     private authorService: AuthorService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {
     this.authorId = this.route.snapshot.paramMap.get('id');
     if (this.authorId) {
@@ -46,12 +47,22 @@ export class AuthorEditComponent {
 
     this.authorService.updateAuthor(authorPayload).subscribe({
       next: () => {
-        this.isSubmitting = false;
-        this.router.navigate(['/authors']);
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          this.router.navigate(['/authors'], { queryParams: { success: 'updated' } });
+        });
       },
       error: err => {
-        this.isSubmitting = false;
-        this.errorMessage = 'Could not update author. Check field formats and try again.';
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          if (err?.status === 409 && err?.error?.error) {
+            this.errorMessage = err.error.error;
+          } else if (err?.error?.error) {
+            this.errorMessage = `Could not update author: ${err.error.error}.`;
+          } else {
+            this.errorMessage = 'Could not update author. Check field formats and try again.';
+          }
+        });
         console.error('Error updating author', err);
       }
     });

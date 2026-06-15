@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, switchMap } from 'rxjs/operators';
 import { Author } from '../author';
+import { AddressLookupService, AddressSuggestion } from '../address-lookup';
 
 @Component({
   selector: 'app-author-form',
@@ -9,7 +12,7 @@ import { Author } from '../author';
   templateUrl: './author-form.html',
   styleUrl: './author-form.scss',
 })
-export class AuthorFormComponent implements OnChanges {
+export class AuthorFormComponent implements OnChanges, OnDestroy {
   @Input() author: Author | null = null;
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() isSubmitting = false;
@@ -22,16 +25,77 @@ export class AuthorFormComponent implements OnChanges {
   readonly statePattern = /^[A-Za-z]{2}$/;
   readonly zipPattern = /^\d{5}$/;
   readonly namePattern = /^[a-zA-Z\s'-]*$/;
+  readonly cityPattern = /^[a-zA-Z\s'.-]*$/;
   readonly phoneCleanPattern = /\D/g;
 
   localValidationMessage = '';
 
   formAuthor: Author = this.createEmptyAuthor();
 
+  addressSuggestions: AddressSuggestion[] = [];
+  showAddressSuggestions = false;
+  isSearchingAddress = false;
+
+  private readonly addressQuery$ = new Subject<string>();
+  private readonly addressSubscription: Subscription;
+
+  constructor(private addressLookup: AddressLookupService) {
+    this.addressSubscription = this.addressQuery$
+      .pipe(
+        debounceTime(300),
+        switchMap(query => {
+          this.isSearchingAddress = true;
+          return this.addressLookup.search(query);
+        })
+      )
+      .subscribe(suggestions => {
+        this.addressSuggestions = suggestions;
+        this.showAddressSuggestions = suggestions.length > 0;
+        this.isSearchingAddress = false;
+      });
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['author']) {
       this.formAuthor = this.cloneAuthor(this.author);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.addressSubscription.unsubscribe();
+  }
+
+  onAddressInput(value: string): void {
+    this.formAuthor.address = value;
+
+    if (value.trim().length < 3) {
+      this.addressSuggestions = [];
+      this.showAddressSuggestions = false;
+      return;
+    }
+
+    this.addressQuery$.next(value);
+  }
+
+  selectAddressSuggestion(suggestion: AddressSuggestion): void {
+    this.formAuthor.address = suggestion.address.slice(0, 40);
+
+    if (suggestion.city) {
+      this.formAuthor.city = suggestion.city.slice(0, 20);
+    }
+
+    if (suggestion.province) {
+      this.formAuthor.state = suggestion.province;
+    }
+
+    this.addressSuggestions = [];
+    this.showAddressSuggestions = false;
+  }
+
+  hideAddressSuggestions(): void {
+    setTimeout(() => {
+      this.showAddressSuggestions = false;
+    }, 150);
   }
 
   handleSubmit(form: NgForm): void {
@@ -88,6 +152,8 @@ export class AuthorFormComponent implements OnChanges {
     }
     if (!this.formAuthor.city.trim()) {
       errors.push('City: required');
+    } else if (!this.cityPattern.test(this.formAuthor.city.trim())) {
+      errors.push('City: letters only (no numbers)');
     }
     if (!this.formAuthor.state.trim() || !this.statePattern.test(this.formAuthor.state.trim())) {
       errors.push('State: 2 letters');
@@ -110,7 +176,8 @@ export class AuthorFormComponent implements OnChanges {
       this.formAuthor.au_lname.trim().length > 0 &&
       /^\d{3}-\d{3}-\d{4}$/.test(this.formAuthor.phone.trim()) &&
       this.formAuthor.address.trim().length > 0 &&
-      this.formAuthor.city.trim().length > 0
+      this.formAuthor.city.trim().length > 0 &&
+      this.cityPattern.test(this.formAuthor.city.trim())
     );
   }
 

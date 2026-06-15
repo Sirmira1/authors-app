@@ -54,7 +54,7 @@ h2 {
 .sort-controls {
     display: flex;
     align-items: center;
-    gap: var(--on-space-3);
+    gap: var(--on-space-2);
     flex-wrap: wrap;
     margin-bottom: var(--on-space-4);
 }
@@ -72,8 +72,8 @@ h2 {
 }
 
 .sort-controls .search-field {
-    flex: 1 1 320px;
-    min-width: 320px;
+    flex: 1 1 200px;
+    min-width: 180px;
 }
 
 .sort-controls .search-field input[type="search"] {
@@ -81,8 +81,8 @@ h2 {
 }
 
 .sort-controls select {
-    min-width: 135px;
-    padding: 0.4rem 0.55rem;
+    min-width: 105px;
+    padding: 0.4rem 0.5rem;
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-sm);
     background: #f9fbfd;
@@ -90,8 +90,8 @@ h2 {
 }
 
 .sort-controls input[type="search"] {
-    min-width: 220px;
-    padding: 0.4rem 0.55rem;
+    min-width: 150px;
+    padding: 0.4rem 0.5rem;
     border: 1px solid var(--on-border);
     border-radius: var(--on-radius-sm);
     background: #f9fbfd;
@@ -377,6 +377,14 @@ button:disabled {
 
 .secondary-btn:hover {
     background: #566777;
+}
+
+.primary-btn {
+    background: var(--on-green);
+}
+
+.primary-btn:hover {
+    background: var(--on-green-strong);
 }
 
 .danger-btn {

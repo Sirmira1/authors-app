@@ -131,3 +131,40 @@ button[type='submit']:disabled {
 .button-cancel:hover {
     background: #c9d4dd;
 }
+
+.address-autocomplete {
+    position: relative;
+}
+
+.address-suggestions {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-sm);
+    background: var(--on-white);
+    box-shadow: var(--on-shadow);
+}
+
+.address-suggestions li {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--on-charcoal);
+    cursor: pointer;
+    border-bottom: 1px solid var(--on-border);
+}
+
+.address-suggestions li:last-child {
+    border-bottom: none;
+}
+
+.address-suggestions li:hover {
+    background: rgba(33, 121, 183, 0.1);
+}

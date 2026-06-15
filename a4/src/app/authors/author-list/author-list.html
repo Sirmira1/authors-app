@@ -5,12 +5,12 @@
     <div class="sort-controls">
         <div class="control-field search-field">
             <label for="authorSearch">Search</label>
-            <input id="authorSearch" type="search" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search any author field" aria-label="Search authors by any column">
+            <input id="authorSearch" type="search" [(ngModel)]="draftSearchTerm" (keyup.enter)="applySearch()" placeholder="Search any author field" aria-label="Search authors by any column">
         </div>
 
         <div class="control-field">
             <label for="cityFilter">City</label>
-            <select id="cityFilter" [ngModel]="cityFilter" (ngModelChange)="onCityFilterChange($event)">
+            <select id="cityFilter" [(ngModel)]="draftCityFilter">
                 <option value="">All cities</option>
                 <option *ngFor="let city of cityOptions" [value]="city">{{ city }}</option>
             </select>
@@ -18,7 +18,7 @@
 
         <div class="control-field">
             <label for="stateFilter">State</label>
-            <select id="stateFilter" [ngModel]="stateFilter" (ngModelChange)="onStateFilterChange($event)">
+            <select id="stateFilter" [(ngModel)]="draftStateFilter">
                 <option value="">All states</option>
                 <option *ngFor="let state of stateOptions" [value]="state">{{ state }}</option>
             </select>
@@ -26,7 +26,7 @@
 
         <div class="control-field">
             <label for="contractFilter">Contract</label>
-            <select id="contractFilter" [ngModel]="contractFilter" (ngModelChange)="onContractFilterChange($event)">
+            <select id="contractFilter" [(ngModel)]="draftContractFilter">
                 <option value="all">All</option>
                 <option value="yes">Contracted</option>
                 <option value="no">Not contracted</option>
@@ -35,7 +35,7 @@
 
         <div class="control-field">
             <label for="sortKey">Sort by</label>
-            <select id="sortKey" [ngModel]="sortKey" (ngModelChange)="onSortSelectionChange($event)">
+            <select id="sortKey" [(ngModel)]="draftSortKey">
                 <option value="au_id">ID</option>
                 <option value="au_fname">First Name</option>
                 <option value="au_lname">Last Name</option>
@@ -50,11 +50,13 @@
 
         <div class="control-field">
             <label for="sortDirection">Order</label>
-            <select id="sortDirection" [ngModel]="sortDirection" (ngModelChange)="onSortDirectionChange($event)">
+            <select id="sortDirection" [(ngModel)]="draftSortDirection">
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
             </select>
         </div>
+
+        <button type="button" class="primary-btn" (click)="applySearch()">Search</button>
 
         <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
 

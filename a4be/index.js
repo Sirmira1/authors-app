@@ -9,6 +9,19 @@ const PORT = process.env.PORT || 3000;
 const ID_PATTERN = /^\d{3}-\d{2}-\d{4}$/;
 const STATE_PATTERN = /^[A-Za-z]{2}$/;
 const ZIP_PATTERN = /^\d{5}$/;
+const CITY_PATTERN = /^[A-Za-z\s'.-]+$/;
+
+// Maximum lengths matching the authors table columns in the database.
+const MAX_LENGTHS = {
+  au_id: 11,
+  au_lname: 40,
+  au_fname: 20,
+  phone: 12,
+  address: 40,
+  city: 20,
+  state: 2,
+  zip: 5,
+};
 
 const requiredEnvVars = ["DB_SERVER", "DB_DATABASE"];
 const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
@@ -27,6 +40,23 @@ let pool;
 
 function isValidAuthorId(id) {
   return typeof id === "string" && ID_PATTERN.test(id.trim());
+}
+
+// Returns the au_id of an existing author with the same phone, excluding a given id.
+async function findAuthorIdByPhone(phone, excludeId = null) {
+  if (!phone) {
+    return null;
+  }
+
+  const result = await pool.request()
+    .input("phone", sql.Char(12), phone)
+    .query('SELECT au_id FROM authors WHERE phone = @phone');
+
+  const match = result.recordset.find(
+    (row) => !excludeId || row.au_id.trim() !== excludeId.trim()
+  );
+
+  return match ? match.au_id.trim() : null;
 }
 
 function normalizeAuthorPayload(body) {
@@ -56,8 +86,20 @@ function validateAuthorPayload(author, options = { includeId: true }) {
     return "state must be 2 letters when provided";
   }
 
+  if (author.city && !CITY_PATTERN.test(author.city)) {
+    return "city must not contain numbers";
+  }
+
   if (author.zip && !ZIP_PATTERN.test(author.zip)) {
     return "zip must be 5 digits when provided";
+  }
+
+  const tooLongField = Object.keys(MAX_LENGTHS).find(
+    (field) => (author[field] || "").length > MAX_LENGTHS[field]
+  );
+
+  if (tooLongField) {
+    return `${tooLongField} must be ${MAX_LENGTHS[tooLongField]} characters or fewer`;
   }
 
   return null;
@@ -166,15 +208,21 @@ app.post("/api/authors", async (req, res) => {
     if (validationError) {
       return res.status(400).json({ error: validationError });
     }
+
+    const duplicatePhoneId = await findAuthorIdByPhone(author.phone);
+    if (duplicatePhoneId) {
+      return res.status(409).json({ error: 'This phone number is already used by another author.' });
+    }
+
     await pool.request()
       .input("au_id", sql.VarChar(11), author.au_id)
       .input("au_lname", sql.VarChar(40), author.au_lname)
-      .input("au_fname", sql.VarChar(40), author.au_fname)
+      .input("au_fname", sql.VarChar(20), author.au_fname)
       .input("phone", sql.Char(12), author.phone)
-      .input("address", sql.VarChar(60), author.address)
-      .input("city", sql.VarChar(30), author.city)
+      .input("address", sql.VarChar(40), author.address)
+      .input("city", sql.VarChar(20), author.city)
       .input("state", sql.Char(2), author.state)
-      .input("zip", sql.Char(10), author.zip)
+      .input("zip", sql.Char(5), author.zip)
       .input("contract", sql.Bit, author.contract ? 1 : 0)
       .query('INSERT INTO authors (au_id, au_lname, au_fname, phone, address, city, state, zip, contract) VALUES (@au_id, @au_lname, @au_fname, @phone, @address, @city, @state, @zip, @contract)');
     res.status(201).json({ message: 'Author created successfully' });
@@ -202,15 +250,20 @@ app.put("/api/authors/:id", async (req, res) => {
       return res.status(400).json({ error: validationError });
     }
 
+    const duplicatePhoneId = await findAuthorIdByPhone(author.phone, id);
+    if (duplicatePhoneId) {
+      return res.status(409).json({ error: 'This phone number is already used by another author.' });
+    }
+
     const result = await pool.request()
       .input("au_id", sql.VarChar(11), id)
       .input("au_lname", sql.VarChar(40), author.au_lname)
-      .input("au_fname", sql.VarChar(40), author.au_fname)
+      .input("au_fname", sql.VarChar(20), author.au_fname)
       .input("phone", sql.Char(12), author.phone)
-      .input("address", sql.VarChar(60), author.address)
-      .input("city", sql.VarChar(30), author.city)
+      .input("address", sql.VarChar(40), author.address)
+      .input("city", sql.VarChar(20), author.city)
       .input("state", sql.Char(2), author.state)
-      .input("zip", sql.Char(10), author.zip)
+      .input("zip", sql.Char(5), author.zip)
       .input("contract", sql.Bit, author.contract ? 1 : 0)
       .query('UPDATE authors SET au_lname = @au_lname, au_fname = @au_fname, phone = @phone, address = @address, city = @city, state = @state, zip = @zip, contract = @contract WHERE au_id = @au_id');
     if (result.rowsAffected[0] === 0) {
@@ -239,10 +292,11 @@ app.delete("/api/authors/:id", async (req, res) => {
     }
     res.json({ message: 'Author deleted successfully' });
   } catch (err) {
-    console.error('Error deleting author:', err);
     if (err?.number === 547 || err?.originalError?.info?.number === 547) {
+      console.warn(`Delete blocked for author ${req.params.id}: linked to one or more books.`);
       return res.status(409).json({ error: 'Cannot delete this author because they are linked to one or more books.' });
     }
+    console.error('Error deleting author:', err);
     res.status(500).json({ error: 'Failed to delete author' });
   }
 });
