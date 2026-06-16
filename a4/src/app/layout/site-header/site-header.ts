@@ -1,11 +1,22 @@
-import { Component } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Component, ElementRef, HostListener } from '@angular/core';
+import { NgIf, NgFor } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+
+interface NavLink {
+  label: string;
+  link: string;
+}
+
+interface NavMenu {
+  label: string;
+  basePath: string;
+  links: NavLink[];
+}
 
 @Component({
   selector: 'app-site-header',
   standalone: true,
-  imports: [RouterLink, NgIf],
+  imports: [RouterLink, NgIf, NgFor],
   template: `
     <header class="gov-header" role="banner">
       <div class="gov-header__bar">
@@ -22,15 +33,31 @@ import { RouterLink } from '@angular/router';
           </div>
           <div class="gov-header__meta">
             <p class="gov-header__kicker">Government of Ontario</p>
-            <h1 class="gov-header__title">Author Management Portal</h1>
+            <h1 class="gov-header__title">Pubs Management Portal</h1>
           </div>
         </div>
       </div>
 
       <div class="gov-header__nav-wrap">
         <nav class="gov-nav" aria-label="Primary">
-          <a routerLink="/authors">Authors Directory</a>
-          <a routerLink="/authors/new">Register Author</a>
+          <div class="gov-nav__menu" *ngFor="let menu of menus">
+            <button
+              type="button"
+              class="gov-nav__trigger"
+              [class.open]="openMenu === menu.label"
+              [class.active]="isMenuActive(menu.basePath)"
+              [attr.aria-expanded]="openMenu === menu.label"
+              (click)="toggleMenu(menu.label, $event)"
+            >
+              {{ menu.label }}
+              <span class="gov-nav__caret" aria-hidden="true">▾</span>
+            </button>
+            <ul class="gov-nav__dropdown" *ngIf="openMenu === menu.label" role="menu">
+              <li *ngFor="let item of menu.links" role="none">
+                <a role="menuitem" [routerLink]="item.link" (click)="closeMenu()">{{ item.label }}</a>
+              </li>
+            </ul>
+          </div>
         </nav>
       </div>
     </header>
@@ -118,19 +145,61 @@ import { RouterLink } from '@angular/router';
         flex-wrap: wrap;
       }
 
-      .gov-nav a {
+      .gov-nav__menu {
+        position: relative;
+      }
+
+      .gov-nav__trigger {
         display: inline-flex;
         align-items: center;
+        gap: 0.4rem;
         min-height: 40px;
         padding: 0 0.9rem;
         border-radius: 999px;
         border: 1px solid #2179b7;
+        background: #fff;
         color: #2179b7;
         font-weight: 700;
-        text-decoration: none;
+        font-size: 1rem;
+        cursor: pointer;
       }
 
-      .gov-nav a:hover {
+      .gov-nav__trigger:hover,
+      .gov-nav__trigger.open,
+      .gov-nav__trigger.active {
+        background: #e8f2f9;
+      }
+
+      .gov-nav__caret {
+        font-size: 0.7rem;
+      }
+
+      .gov-nav__dropdown {
+        position: absolute;
+        z-index: 30;
+        top: calc(100% + 4px);
+        left: 0;
+        min-width: 200px;
+        margin: 0;
+        padding: 0.35rem;
+        list-style: none;
+        background: #fff;
+        border: 1px solid #c9d4dd;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .gov-nav__dropdown a {
+        display: block;
+        padding: 0.55rem 0.75rem;
+        border-radius: 6px;
+        color: #1f3b54;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .gov-nav__dropdown a:hover {
         background: #e8f2f9;
       }
 
@@ -158,8 +227,88 @@ import { RouterLink } from '@angular/router';
 export class SiteHeaderComponent {
   logoPath = '/ontario-logo.svg';
   logoFailed = false;
+  openMenu: string | null = null;
+
+  readonly menus: NavMenu[] = [
+    {
+      label: 'Authors',
+      basePath: '/authors',
+      links: [
+        { label: 'Authors Directory', link: '/authors' },
+        { label: 'Register Author', link: '/authors/new' },
+      ],
+    },
+    {
+      label: 'Publishers',
+      basePath: '/publishers',
+      links: [
+        { label: 'Publishers Directory', link: '/publishers' },
+        { label: 'Register Publisher', link: '/publishers/new' },
+      ],
+    },
+    {
+      label: 'Jobs',
+      basePath: '/jobs',
+      links: [
+        { label: 'Jobs Directory', link: '/jobs' },
+        { label: 'Register Job', link: '/jobs/new' },
+      ],
+    },
+    {
+      label: 'Titles',
+      basePath: '/titles',
+      links: [
+        { label: 'Titles Directory', link: '/titles' },
+        { label: 'Register Title', link: '/titles/new' },
+      ],
+    },
+    {
+      label: 'Employees',
+      basePath: '/employees',
+      links: [
+        { label: 'Employees Directory', link: '/employees' },
+        { label: 'Register Employee', link: '/employees/new' },
+      ],
+    },
+    {
+      label: 'Sales',
+      basePath: '/sales',
+      links: [
+        { label: 'Sales Directory', link: '/sales' },
+        { label: 'Register Sale', link: '/sales/new' },
+      ],
+    },
+  ];
+
+  constructor(private elementRef: ElementRef<HTMLElement>, private router: Router) {}
 
   onLogoError(): void {
     this.logoFailed = true;
+  }
+
+  isMenuActive(basePath: string): boolean {
+    const currentUrl = this.router.url.split('?')[0];
+    return currentUrl === basePath || currentUrl.startsWith(basePath + '/');
+  }
+
+  toggleMenu(label: string, event: Event): void {
+    event.stopPropagation();
+    this.openMenu = this.openMenu === label ? null : label;
+  }
+
+  closeMenu(): void {
+    this.openMenu = null;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
+      this.closeMenu();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeMenu();
   }
 }

@@ -1,0 +1,8 @@
+<app-publisher-form
+    [publisher]="publisher"
+    mode="create"
+    [isSubmitting]="isSubmitting"
+    [errorMessage]="errorMessage"
+    (save)="createPublisher($event)"
+    (cancel)="goBack()">
+</app-publisher-form>

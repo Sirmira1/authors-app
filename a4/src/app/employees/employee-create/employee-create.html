@@ -1,0 +1,8 @@
+<app-employee-form
+    [employee]="employee"
+    mode="create"
+    [isSubmitting]="isSubmitting"
+    [errorMessage]="errorMessage"
+    (save)="createEmployee($event)"
+    (cancel)="goBack()">
+</app-employee-form>

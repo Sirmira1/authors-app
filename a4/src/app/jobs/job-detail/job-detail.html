@@ -1,0 +1,12 @@
+<div class="entity-list-shell" *ngIf="job; else notFound">
+    <h2>Job Details</h2>
+    <p><strong>ID:</strong> {{ job.job_id }}</p>
+    <p><strong>Description:</strong> {{ job.job_desc }}</p>
+    <p><strong>Min Level:</strong> {{ job.min_lvl }}</p>
+    <p><strong>Max Level:</strong> {{ job.max_lvl }}</p>
+    <button type="button" routerLink="/jobs">Back</button>
+</div>
+<ng-template #notFound>
+    <p>Job not found.</p>
+    <button type="button" routerLink="/jobs">Back</button>
+</ng-template>

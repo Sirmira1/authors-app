@@ -1,0 +1,31 @@
+<form #jobForm="ngForm" (ngSubmit)="handleSubmit(jobForm)">
+    <h2>{{ mode === 'create' ? 'Create Job' : 'Edit Job' }}</h2>
+    <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
+    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+        {{ errorMessage || localValidationMessage }}
+    </p>
+
+    <ng-container *ngIf="mode === 'edit'">
+        <label for="jobId">Job ID:</label>
+        <input type="text" id="jobId" [ngModel]="formJob.job_id" name="job_id" disabled>
+    </ng-container>
+
+    <label for="jobDesc">Description: <span class="required">*</span></label>
+    <input type="text" id="jobDesc" [(ngModel)]="formJob.job_desc" #jobDescModel="ngModel" name="job_desc" required maxlength="50" placeholder="e.g. Managing Editor" [class.input-invalid]="showFieldError(jobDescModel)">
+    <p class="field-error" *ngIf="showFieldError(jobDescModel)">Description is required (max 50 characters).</p>
+
+    <label for="minLvl">Min Level: <span class="required">*</span></label>
+    <input type="number" id="minLvl" [(ngModel)]="formJob.min_lvl" #minLvlModel="ngModel" name="min_lvl" required min="10" max="250" [class.input-invalid]="showFieldError(minLvlModel)">
+    <p class="field-error" *ngIf="showFieldError(minLvlModel)">Min level must be a whole number between 10 and 250.</p>
+
+    <label for="maxLvl">Max Level: <span class="required">*</span></label>
+    <input type="number" id="maxLvl" [(ngModel)]="formJob.max_lvl" #maxLvlModel="ngModel" name="max_lvl" required min="10" max="250" [class.input-invalid]="showFieldError(maxLvlModel)">
+    <p class="field-error" *ngIf="showFieldError(maxLvlModel)">Max level must be a whole number between 10 and 250.</p>
+
+    <div class="actions">
+        <button type="submit" [disabled]="isSubmitting || jobForm.invalid">
+            {{ isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : (mode === 'create' ? 'Create Job' : 'Save') }}
+        </button>
+        <button type="button" class="button-cancel" (click)="cancel.emit()">Cancel</button>
+    </div>
+</form>

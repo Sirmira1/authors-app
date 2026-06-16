@@ -1,0 +1,51 @@
+<form #titleForm="ngForm" (ngSubmit)="handleSubmit(titleForm)">
+    <h2>{{ mode === 'create' ? 'Create Title' : 'Edit Title' }}</h2>
+    <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
+    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+        {{ errorMessage || localValidationMessage }}
+    </p>
+
+    <label for="titleId">Title ID: <span class="required">*</span></label>
+    <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
+    <input type="text" id="titleId" [(ngModel)]="formTitle.title_id" #titleIdModel="ngModel" name="title_id" required pattern="^[A-Za-z]{2}\d{4}$" title="Use 2 letters followed by 4 digits" placeholder="BU1032" [class.input-invalid]="showFieldError(titleIdModel)" disabled>
+    <p class="field-error" *ngIf="showFieldError(titleIdModel)">Incorrect format. Use 2 letters then 4 digits, for example BU1032.</p>
+
+    <label for="title">Title: <span class="required">*</span></label>
+    <input type="text" id="title" [(ngModel)]="formTitle.title" #titleModel="ngModel" name="title" required maxlength="80" placeholder="e.g. The Busy Executive's Database Guide" [class.input-invalid]="showFieldError(titleModel)">
+    <p class="field-error" *ngIf="showFieldError(titleModel)">Title is required (max 80 characters).</p>
+
+    <label for="type">Type:</label>
+    <input type="text" id="type" [(ngModel)]="formTitle.type" #typeModel="ngModel" name="type" maxlength="12" placeholder="e.g. business" [class.input-invalid]="showFieldError(typeModel)">
+    <p class="field-error" *ngIf="showFieldError(typeModel)">Type must be 12 characters or fewer.</p>
+
+    <label for="pubId">Publisher:</label>
+    <select id="pubId" [(ngModel)]="formTitle.pub_id" name="pub_id">
+        <option [ngValue]="null">— None —</option>
+        <option *ngFor="let publisher of publishers" [ngValue]="publisher.pub_id">{{ publisher.pub_name }} ({{ publisher.pub_id }})</option>
+    </select>
+
+    <label for="price">Price:</label>
+    <input type="number" id="price" [(ngModel)]="formTitle.price" name="price" min="0" step="0.01" placeholder="e.g. 19.99">
+
+    <label for="advance">Advance:</label>
+    <input type="number" id="advance" [(ngModel)]="formTitle.advance" name="advance" min="0" step="0.01" placeholder="e.g. 5000">
+
+    <label for="royalty">Royalty (%):</label>
+    <input type="number" id="royalty" [(ngModel)]="formTitle.royalty" name="royalty" min="0" step="1" placeholder="e.g. 10">
+
+    <label for="ytdSales">YTD Sales:</label>
+    <input type="number" id="ytdSales" [(ngModel)]="formTitle.ytd_sales" name="ytd_sales" min="0" step="1" placeholder="e.g. 4095">
+
+    <label for="pubdate">Pub Date:</label>
+    <input type="date" id="pubdate" [(ngModel)]="formTitle.pubdate" name="pubdate">
+
+    <label for="notes">Notes:</label>
+    <textarea id="notes" [(ngModel)]="formTitle.notes" name="notes" maxlength="200" placeholder="Optional notes (max 200 characters)"></textarea>
+
+    <div class="actions">
+        <button type="submit" [disabled]="isSubmitting || titleForm.invalid">
+            {{ isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : (mode === 'create' ? 'Create Title' : 'Save') }}
+        </button>
+        <button type="button" class="button-cancel" (click)="cancel.emit()">Cancel</button>
+    </div>
+</form>

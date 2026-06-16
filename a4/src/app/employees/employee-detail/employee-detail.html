@@ -1,0 +1,14 @@
+<div class="entity-list-shell" *ngIf="employee; else notFound">
+    <h2>Employee Details</h2>
+    <p><strong>ID:</strong> {{ employee.emp_id }}</p>
+    <p><strong>Name:</strong> {{ getFullName(employee) }}</p>
+    <p><strong>Job:</strong> {{ employee.job_desc || '—' }}</p>
+    <p><strong>Job Level:</strong> {{ employee.job_lvl ?? '—' }}</p>
+    <p><strong>Publisher:</strong> {{ employee.pub_name || '—' }} <span *ngIf="employee.pub_id">({{ employee.pub_id }})</span></p>
+    <p><strong>Hire Date:</strong> {{ formatDate(employee.hire_date) }}</p>
+    <button type="button" routerLink="/employees">Back</button>
+</div>
+<ng-template #notFound>
+    <p>Employee not found.</p>
+    <button type="button" routerLink="/employees">Back</button>
+</ng-template>

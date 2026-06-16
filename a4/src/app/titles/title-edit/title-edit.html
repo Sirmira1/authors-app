@@ -1,0 +1,14 @@
+<div *ngIf="title; else notFound">
+    <app-title-form
+        [title]="title"
+        mode="edit"
+        [isSubmitting]="isSubmitting"
+        [errorMessage]="errorMessage"
+        (save)="saveTitle($event)"
+        (cancel)="goBack()">
+    </app-title-form>
+</div>
+<ng-template #notFound>
+    <p>Title not found.</p>
+    <button (click)="goBack()">Back to Titles</button>
+</ng-template>

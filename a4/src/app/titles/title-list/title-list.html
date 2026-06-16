@@ -1,0 +1,157 @@
+<div class="entity-list-shell">
+    <h2>Titles List</h2>
+    <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
+    <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <div class="sort-controls">
+        <div class="control-field search-field">
+            <label for="titleSearch">Search</label>
+            <input id="titleSearch" type="search" [(ngModel)]="draftSearchTerm" (keyup.enter)="applySearch()" placeholder="Search any title field" aria-label="Search titles by any column">
+        </div>
+
+        <div class="control-field">
+            <label for="typeFilter">Type</label>
+            <select id="typeFilter" [(ngModel)]="draftTypeFilter">
+                <option value="">All types</option>
+                <option *ngFor="let type of typeOptions" [value]="type">{{ formatType(type) }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="publisherFilter">Publisher</label>
+            <select id="publisherFilter" [(ngModel)]="draftPublisherFilter">
+                <option value="">All publishers</option>
+                <option *ngFor="let publisher of publisherOptions" [value]="publisher">{{ publisher }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortKey">Sort by</label>
+            <select id="sortKey" [(ngModel)]="draftSortKey">
+                <option value="title_id">ID</option>
+                <option value="title">Title</option>
+                <option value="type">Type</option>
+                <option value="pub_name">Publisher</option>
+                <option value="price">Price</option>
+                <option value="ytd_sales">YTD Sales</option>
+                <option value="pubdate">Pub Date</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortDirection">Order</label>
+            <select id="sortDirection" [(ngModel)]="draftSortDirection">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </div>
+
+        <button type="button" class="primary-btn" (click)="applySearch()">Search</button>
+        <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="saved-view-controls">
+        <label for="savedViewSelect">Saved views</label>
+        <select id="savedViewSelect" [ngModel]="selectedSavedViewName" (ngModelChange)="onSavedViewSelectionChange($event)">
+            <option value="">Select a saved view</option>
+            <option *ngFor="let view of savedViews" [value]="view.name">{{ view.name }}</option>
+        </select>
+        <button type="button" class="secondary-btn" (click)="applySavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Apply</button>
+        <button type="button" class="danger-btn" (click)="deleteSavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Delete</button>
+
+        <input type="text" [ngModel]="newSavedViewName" (ngModelChange)="newSavedViewName = $event" placeholder="New view name" aria-label="Name for saved view">
+        <button type="button" (click)="saveCurrentView()" [disabled]="!newSavedViewName.trim()">Save Current View</button>
+
+        <div class="control-field rows-per-page-field">
+            <label for="pageSizeSelect">Rows per page</label>
+            <select id="pageSizeSelect" [ngModel]="manualPageSize === null ? 'auto' : manualPageSize" (ngModelChange)="onManualPageSizeChange($event)">
+                <option value="auto">Auto-fit ({{ autoFitPageSize }})</option>
+                <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table style="min-width: 1100px;">
+            <colgroup>
+                <col style="width: 80px">
+                <col>
+                <col style="width: 110px">
+                <col style="width: 150px">
+                <col style="width: 90px">
+                <col style="width: 95px">
+                <col style="width: 110px">
+                <col style="width: 250px">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('title_id')" role="button" tabindex="0" (click)="sortByHeader('title_id')" (keydown.enter)="sortByHeader('title_id')" (keydown.space)="sortByHeader('title_id'); $event.preventDefault()">
+                            ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('title_id') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('title')" role="button" tabindex="0" (click)="sortByHeader('title')" (keydown.enter)="sortByHeader('title')" (keydown.space)="sortByHeader('title'); $event.preventDefault()">
+                            Title <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('title') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('type')" role="button" tabindex="0" (click)="sortByHeader('type')" (keydown.enter)="sortByHeader('type')" (keydown.space)="sortByHeader('type'); $event.preventDefault()">
+                            Type <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('type') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('pub_name')" role="button" tabindex="0" (click)="sortByHeader('pub_name')" (keydown.enter)="sortByHeader('pub_name')" (keydown.space)="sortByHeader('pub_name'); $event.preventDefault()">
+                            Publisher <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_name') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('price')" role="button" tabindex="0" (click)="sortByHeader('price')" (keydown.enter)="sortByHeader('price')" (keydown.space)="sortByHeader('price'); $event.preventDefault()">
+                            Price <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('price') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('ytd_sales')" role="button" tabindex="0" (click)="sortByHeader('ytd_sales')" (keydown.enter)="sortByHeader('ytd_sales')" (keydown.space)="sortByHeader('ytd_sales'); $event.preventDefault()">
+                            YTD Sales <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('ytd_sales') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('pubdate')" role="button" tabindex="0" (click)="sortByHeader('pubdate')" (keydown.enter)="sortByHeader('pubdate')" (keydown.space)="sortByHeader('pubdate'); $event.preventDefault()">
+                            Pub Date <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pubdate') }}</span>
+                        </span>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let title of pagedTitles; trackBy: trackByTitleId">
+                    <td><span [innerHTML]="getHighlightedText(title.title_id)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(title.title)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(formatType(title.type))"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(title.pub_name)"></span></td>
+                    <td>{{ formatMoney(title.price) }}</td>
+                    <td>{{ title.ytd_sales ?? '—' }}</td>
+                    <td>{{ formatDate(title.pubdate) }}</td>
+                    <td class="actions-cell">
+                        <button [routerLink]="['/titles', title.title_id]">View Title Details</button>
+                        <button [routerLink]="['/titles/edit', title.title_id]">Edit Title</button>
+                        <button (click)="deleteTitle(title.title_id)">Delete Title</button>
+                    </td>
+                </tr>
+                <tr *ngIf="pagedTitles.length === 0">
+                    <td colspan="8" class="empty-state">No titles found with the current filters.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" role="navigation" aria-label="Title list pages">
+        <p class="pagination-status" aria-live="polite">
+            Showing {{ pageStartItem }}-{{ pageEndItem }} of {{ viewTitles.length }}
+            | Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="pagination-actions">
+            <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
+    </div>
+</div>

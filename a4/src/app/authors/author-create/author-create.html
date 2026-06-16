@@ -3,5 +3,6 @@
     mode="create"
     [isSubmitting]="isSubmitting"
     [errorMessage]="errorMessage"
-    (save)="createAuthor($event)">
+    (save)="createAuthor($event)"
+    (cancel)="goBack()">
 </app-author-form>

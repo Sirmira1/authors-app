@@ -1,0 +1,14 @@
+<div *ngIf="job; else notFound">
+    <app-job-form
+        [job]="job"
+        mode="edit"
+        [isSubmitting]="isSubmitting"
+        [errorMessage]="errorMessage"
+        (save)="saveJob($event)"
+        (cancel)="goBack()">
+    </app-job-form>
+</div>
+<ng-template #notFound>
+    <p>Job not found.</p>
+    <button (click)="goBack()">Back to Jobs</button>
+</ng-template>

@@ -1,0 +1,18 @@
+<div class="entity-list-shell" *ngIf="title; else notFound">
+    <h2>Title Details</h2>
+    <p><strong>ID:</strong> {{ title.title_id }}</p>
+    <p><strong>Title:</strong> {{ title.title }}</p>
+    <p><strong>Type:</strong> {{ formatType(title.type) }}</p>
+    <p><strong>Publisher ID:</strong> {{ title.pub_id || '—' }}</p>
+    <p><strong>Price:</strong> {{ formatMoney(title.price) }}</p>
+    <p><strong>Advance:</strong> {{ formatMoney(title.advance) }}</p>
+    <p><strong>Royalty:</strong> {{ title.royalty ?? '—' }}</p>
+    <p><strong>YTD Sales:</strong> {{ title.ytd_sales ?? '—' }}</p>
+    <p><strong>Pub Date:</strong> {{ formatDate(title.pubdate) }}</p>
+    <p><strong>Notes:</strong> {{ title.notes || '—' }}</p>
+    <button type="button" routerLink="/titles">Back</button>
+</div>
+<ng-template #notFound>
+    <p>Title not found.</p>
+    <button type="button" routerLink="/titles">Back</button>
+</ng-template>

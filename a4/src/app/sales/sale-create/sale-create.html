@@ -1,0 +1,8 @@
+<app-sale-form
+    [sale]="sale"
+    mode="create"
+    [isSubmitting]="isSubmitting"
+    [errorMessage]="errorMessage"
+    (save)="createSale($event)"
+    (cancel)="goBack()">
+</app-sale-form>

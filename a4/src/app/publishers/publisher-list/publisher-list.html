@@ -1,0 +1,151 @@
+<div class="publisher-list-shell">
+    <h2>Publishers List</h2>
+    <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
+    <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <div class="sort-controls">
+        <div class="control-field search-field">
+            <label for="publisherSearch">Search</label>
+            <input id="publisherSearch" type="search" [(ngModel)]="draftSearchTerm" (keyup.enter)="applySearch()" placeholder="Search any publisher field" aria-label="Search publishers by any column">
+        </div>
+
+        <div class="control-field">
+            <label for="cityFilter">City</label>
+            <select id="cityFilter" [(ngModel)]="draftCityFilter">
+                <option value="">All cities</option>
+                <option *ngFor="let city of cityOptions" [value]="city">{{ city }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="stateFilter">State</label>
+            <select id="stateFilter" [(ngModel)]="draftStateFilter">
+                <option value="">All states</option>
+                <option *ngFor="let state of stateOptions" [value]="state">{{ state }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="countryFilter">Country</label>
+            <select id="countryFilter" [(ngModel)]="draftCountryFilter">
+                <option value="">All countries</option>
+                <option *ngFor="let country of countryOptions" [value]="country">{{ country }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortKey">Sort by</label>
+            <select id="sortKey" [(ngModel)]="draftSortKey">
+                <option value="pub_id">ID</option>
+                <option value="pub_name">Name</option>
+                <option value="city">City</option>
+                <option value="state">State</option>
+                <option value="country">Country</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortDirection">Order</label>
+            <select id="sortDirection" [(ngModel)]="draftSortDirection">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </div>
+
+        <button type="button" class="primary-btn" (click)="applySearch()">Search</button>
+
+        <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
+
+    </div>
+
+    <div class="saved-view-controls">
+        <label for="savedViewSelect">Saved views</label>
+        <select id="savedViewSelect" [ngModel]="selectedSavedViewName" (ngModelChange)="onSavedViewSelectionChange($event)">
+            <option value="">Select a saved view</option>
+            <option *ngFor="let view of savedViews" [value]="view.name">{{ view.name }}</option>
+        </select>
+        <button type="button" class="secondary-btn" (click)="applySavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Apply</button>
+        <button type="button" class="danger-btn" (click)="deleteSavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Delete</button>
+
+        <input type="text" [ngModel]="newSavedViewName" (ngModelChange)="newSavedViewName = $event" placeholder="New view name" aria-label="Name for saved view">
+        <button type="button" (click)="saveCurrentView()" [disabled]="!newSavedViewName.trim()">Save Current View</button>
+
+        <div class="control-field rows-per-page-field">
+            <label for="pageSizeSelect">Rows per page</label>
+            <select id="pageSizeSelect" [ngModel]="manualPageSize === null ? 'auto' : manualPageSize" (ngModelChange)="onManualPageSizeChange($event)">
+                <option value="auto">Auto-fit ({{ autoFitPageSize }})</option>
+                <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <colgroup>
+                <col class="col-id">
+                <col class="col-name">
+                <col class="col-city">
+                <col class="col-state">
+                <col class="col-country">
+                <col class="col-actions">
+            </colgroup>
+            <thead>
+                <tr>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('pub_id')" role="button" tabindex="0" (click)="sortByHeader('pub_id')" (keydown.enter)="sortByHeader('pub_id')" (keydown.space)="sortByHeader('pub_id'); $event.preventDefault()">
+                        ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_id') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('pub_name')" role="button" tabindex="0" (click)="sortByHeader('pub_name')" (keydown.enter)="sortByHeader('pub_name')" (keydown.space)="sortByHeader('pub_name'); $event.preventDefault()">
+                        Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_name') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('city')" role="button" tabindex="0" (click)="sortByHeader('city')" (keydown.enter)="sortByHeader('city')" (keydown.space)="sortByHeader('city'); $event.preventDefault()">
+                        City <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('city') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('state')" role="button" tabindex="0" (click)="sortByHeader('state')" (keydown.enter)="sortByHeader('state')" (keydown.space)="sortByHeader('state'); $event.preventDefault()">
+                        State <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('state') }}</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="sortable-header" [class.active]="isActiveSort('country')" role="button" tabindex="0" (click)="sortByHeader('country')" (keydown.enter)="sortByHeader('country')" (keydown.space)="sortByHeader('country'); $event.preventDefault()">
+                        Country <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('country') }}</span>
+                    </span>
+                </th>
+                <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let publisher of pagedPublishers; trackBy: trackByPublisherId">
+                    <td><span [innerHTML]="getHighlightedText(publisher.pub_id)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(publisher.pub_name)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(publisher.city)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(publisher.state)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(publisher.country)"></span></td>
+                    <td class="actions-cell">
+                        <button [routerLink]="publisher.pub_id ? ['/publishers', publisher.pub_id] : ['/publishers']" [disabled]="!publisher.pub_id">View Publisher Details</button>
+                        <button [routerLink]="publisher.pub_id ? ['/publishers/edit', publisher.pub_id] : ['/publishers']" [disabled]="!publisher.pub_id">Edit Publisher</button>
+                        <button (click)="deletePublisher(publisher.pub_id)" [disabled]="!publisher.pub_id">Delete Publisher</button>
+                    </td>
+                </tr>
+                <tr *ngIf="pagedPublishers.length === 0">
+                    <td colspan="6" class="empty-state">No publishers found with the current filters.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" role="navigation" aria-label="Publisher list pages">
+        <p class="pagination-status" aria-live="polite">
+            Showing {{ pageStartItem }}-{{ pageEndItem }} of {{ viewPublishers.length }}
+            | Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="pagination-actions">
+            <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
+    </div>
+</div>

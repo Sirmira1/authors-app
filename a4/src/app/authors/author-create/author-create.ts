@@ -90,4 +90,8 @@ export class AuthorCreateComponent implements OnInit {
       }
     });
   }
+
+  goBack(): void {
+    this.router.navigate(['/authors']);
+  }
 }

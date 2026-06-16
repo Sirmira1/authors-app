@@ -1,0 +1,117 @@
+<div class="entity-list-shell">
+    <h2>Jobs List</h2>
+    <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
+    <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <div class="sort-controls">
+        <div class="control-field search-field">
+            <label for="jobSearch">Search</label>
+            <input id="jobSearch" type="search" [(ngModel)]="draftSearchTerm" (keyup.enter)="applySearch()" placeholder="Search any job field" aria-label="Search jobs by any column">
+        </div>
+
+        <div class="control-field">
+            <label for="sortKey">Sort by</label>
+            <select id="sortKey" [(ngModel)]="draftSortKey">
+                <option value="job_id">ID</option>
+                <option value="job_desc">Description</option>
+                <option value="min_lvl">Min Level</option>
+                <option value="max_lvl">Max Level</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortDirection">Order</label>
+            <select id="sortDirection" [(ngModel)]="draftSortDirection">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </div>
+
+        <button type="button" class="primary-btn" (click)="applySearch()">Search</button>
+        <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="saved-view-controls">
+        <label for="savedViewSelect">Saved views</label>
+        <select id="savedViewSelect" [ngModel]="selectedSavedViewName" (ngModelChange)="onSavedViewSelectionChange($event)">
+            <option value="">Select a saved view</option>
+            <option *ngFor="let view of savedViews" [value]="view.name">{{ view.name }}</option>
+        </select>
+        <button type="button" class="secondary-btn" (click)="applySavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Apply</button>
+        <button type="button" class="danger-btn" (click)="deleteSavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Delete</button>
+
+        <input type="text" [ngModel]="newSavedViewName" (ngModelChange)="newSavedViewName = $event" placeholder="New view name" aria-label="Name for saved view">
+        <button type="button" (click)="saveCurrentView()" [disabled]="!newSavedViewName.trim()">Save Current View</button>
+
+        <div class="control-field rows-per-page-field">
+            <label for="pageSizeSelect">Rows per page</label>
+            <select id="pageSizeSelect" [ngModel]="manualPageSize === null ? 'auto' : manualPageSize" (ngModelChange)="onManualPageSizeChange($event)">
+                <option value="auto">Auto-fit ({{ autoFitPageSize }})</option>
+                <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <colgroup>
+                <col style="width: 90px">
+                <col>
+                <col style="width: 120px">
+                <col style="width: 120px">
+                <col style="width: 250px">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('job_id')" role="button" tabindex="0" (click)="sortByHeader('job_id')" (keydown.enter)="sortByHeader('job_id')" (keydown.space)="sortByHeader('job_id'); $event.preventDefault()">
+                            ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('job_id') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('job_desc')" role="button" tabindex="0" (click)="sortByHeader('job_desc')" (keydown.enter)="sortByHeader('job_desc')" (keydown.space)="sortByHeader('job_desc'); $event.preventDefault()">
+                            Description <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('job_desc') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('min_lvl')" role="button" tabindex="0" (click)="sortByHeader('min_lvl')" (keydown.enter)="sortByHeader('min_lvl')" (keydown.space)="sortByHeader('min_lvl'); $event.preventDefault()">
+                            Min Level <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('min_lvl') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('max_lvl')" role="button" tabindex="0" (click)="sortByHeader('max_lvl')" (keydown.enter)="sortByHeader('max_lvl')" (keydown.space)="sortByHeader('max_lvl'); $event.preventDefault()">
+                            Max Level <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('max_lvl') }}</span>
+                        </span>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let job of pagedJobs; trackBy: trackByJobId">
+                    <td><span [innerHTML]="getHighlightedText(job.job_id)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(job.job_desc)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(job.min_lvl)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(job.max_lvl)"></span></td>
+                    <td class="actions-cell">
+                        <button [routerLink]="['/jobs', job.job_id]">View Job Details</button>
+                        <button [routerLink]="['/jobs/edit', job.job_id]">Edit Job</button>
+                        <button (click)="deleteJob(job.job_id)">Delete Job</button>
+                    </td>
+                </tr>
+                <tr *ngIf="pagedJobs.length === 0">
+                    <td colspan="5" class="empty-state">No jobs found with the current filters.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" role="navigation" aria-label="Job list pages">
+        <p class="pagination-status" aria-live="polite">
+            Showing {{ pageStartItem }}-{{ pageEndItem }} of {{ viewJobs.length }}
+            | Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="pagination-actions">
+            <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+<app-title-form
+    [title]="title"
+    mode="create"
+    [isSubmitting]="isSubmitting"
+    [errorMessage]="errorMessage"
+    (save)="createTitle($event)"
+    (cancel)="goBack()">
+</app-title-form>

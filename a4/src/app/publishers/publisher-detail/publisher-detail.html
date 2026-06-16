@@ -1,0 +1,13 @@
+<div *ngIf="publisher; else notFound">
+    <h2>Publisher Details</h2>
+    <p><strong>ID:</strong> {{ publisher.pub_id }}</p>
+    <p><strong>Name:</strong> {{ publisher.pub_name }}</p>
+    <p><strong>City:</strong> {{ publisher.city }}</p>
+    <p><strong>State:</strong> {{ publisher.state }}</p>
+    <p><strong>Country:</strong> {{ publisher.country }}</p>
+    <button type="button" routerLink="/publishers">Back</button>
+</div>
+<ng-template #notFound>
+    <p>Publisher not found.</p>
+    <button type="button" routerLink="/publishers">Back</button>
+</ng-template>

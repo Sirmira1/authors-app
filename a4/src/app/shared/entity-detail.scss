@@ -1,0 +1,39 @@
+:host {
+    display: block;
+}
+
+.entity-list-shell {
+    margin: var(--on-space-6) auto;
+    max-width: 760px;
+    padding: var(--on-space-6);
+    border: 1px solid var(--on-border);
+    border-radius: var(--on-radius-lg);
+    background: var(--on-white);
+    box-shadow: var(--on-shadow);
+}
+
+.entity-list-shell h2 {
+    margin-bottom: var(--on-space-4);
+    border-bottom: 3px solid var(--on-green);
+    padding-bottom: var(--on-space-3);
+}
+
+.entity-list-shell p {
+    margin: 0 0 var(--on-space-3) 0;
+    color: var(--on-charcoal);
+}
+
+button {
+    margin-top: var(--on-space-2);
+    padding: 0.65rem 1.2rem;
+    border: 1px solid transparent;
+    border-radius: var(--on-radius-sm);
+    background: var(--on-blue);
+    color: var(--on-white);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--on-blue-strong);
+}

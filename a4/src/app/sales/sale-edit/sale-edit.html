@@ -1,0 +1,14 @@
+<div *ngIf="sale; else notFound">
+    <app-sale-form
+        [sale]="sale"
+        mode="edit"
+        [isSubmitting]="isSubmitting"
+        [errorMessage]="errorMessage"
+        (save)="saveSale($event)"
+        (cancel)="goBack()">
+    </app-sale-form>
+</div>
+<ng-template #notFound>
+    <p>Sale not found.</p>
+    <button (click)="goBack()">Back to Sales</button>
+</ng-template>

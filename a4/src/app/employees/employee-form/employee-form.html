@@ -1,0 +1,49 @@
+<form #employeeForm="ngForm" (ngSubmit)="handleSubmit(employeeForm)">
+    <h2>{{ mode === 'create' ? 'Create Employee' : 'Edit Employee' }}</h2>
+    <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
+    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+        {{ errorMessage || localValidationMessage }}
+    </p>
+
+    <label for="empId">Employee ID: <span class="required">*</span></label>
+    <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
+    <input type="text" id="empId" [(ngModel)]="formEmployee.emp_id" #empIdModel="ngModel" name="emp_id" required placeholder="PMA42628M" [class.input-invalid]="showFieldError(empIdModel)" disabled>
+
+    <label for="fname">First Name: <span class="required">*</span></label>
+    <input type="text" id="fname" [(ngModel)]="formEmployee.fname" #fnameModel="ngModel" name="fname" required maxlength="20" placeholder="e.g. Paolo" [class.input-invalid]="showFieldError(fnameModel)">
+    <p class="field-error" *ngIf="showFieldError(fnameModel)">First name is required (max 20 characters).</p>
+
+    <label for="minit">Middle Initial:</label>
+    <input type="text" id="minit" [(ngModel)]="formEmployee.minit" #minitModel="ngModel" name="minit" maxlength="1" placeholder="e.g. M" [class.input-invalid]="showFieldError(minitModel)">
+    <p class="field-error" *ngIf="showFieldError(minitModel)">Middle initial must be a single character.</p>
+
+    <label for="lname">Last Name: <span class="required">*</span></label>
+    <input type="text" id="lname" [(ngModel)]="formEmployee.lname" #lnameModel="ngModel" name="lname" required maxlength="30" placeholder="e.g. Accorti" [class.input-invalid]="showFieldError(lnameModel)">
+    <p class="field-error" *ngIf="showFieldError(lnameModel)">Last name is required (max 30 characters).</p>
+
+    <label for="jobId">Job: <span class="required">*</span></label>
+    <select id="jobId" [(ngModel)]="formEmployee.job_id" #jobIdModel="ngModel" name="job_id" required [class.input-invalid]="showFieldError(jobIdModel)">
+        <option [ngValue]="0" disabled>— Select a job —</option>
+        <option *ngFor="let job of jobs" [ngValue]="job.job_id">{{ job.job_desc }}</option>
+    </select>
+    <p class="field-error" *ngIf="showFieldError(jobIdModel)">Job is required.</p>
+
+    <label for="jobLvl">Job Level:</label>
+    <input type="number" id="jobLvl" [(ngModel)]="formEmployee.job_lvl" name="job_lvl" min="0" max="250" step="1" placeholder="e.g. 35">
+
+    <label for="pubId">Publisher:</label>
+    <select id="pubId" [(ngModel)]="formEmployee.pub_id" name="pub_id">
+        <option [ngValue]="null">— None —</option>
+        <option *ngFor="let publisher of publishers" [ngValue]="publisher.pub_id">{{ publisher.pub_name }} ({{ publisher.pub_id }})</option>
+    </select>
+
+    <label for="hireDate">Hire Date:</label>
+    <input type="date" id="hireDate" [(ngModel)]="formEmployee.hire_date" name="hire_date">
+
+    <div class="actions">
+        <button type="submit" [disabled]="isSubmitting || employeeForm.invalid">
+            {{ isSubmitting ? (mode === 'create' ? 'Creating...' : 'Saving...') : (mode === 'create' ? 'Create Employee' : 'Save') }}
+        </button>
+        <button type="button" class="button-cancel" (click)="cancel.emit()">Cancel</button>
+    </div>
+</form>

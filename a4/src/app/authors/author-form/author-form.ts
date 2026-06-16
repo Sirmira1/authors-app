@@ -25,7 +25,7 @@ export class AuthorFormComponent implements OnChanges, OnDestroy {
   readonly statePattern = /^[A-Za-z]{2}$/;
   readonly zipPattern = /^\d{5}$/;
   readonly namePattern = /^[a-zA-Z\s'-]*$/;
-  readonly cityPattern = /^[a-zA-Z\s'.-]*$/;
+  readonly cityPattern = /^[\p{L}\s'.-]*$/u;
   readonly phoneCleanPattern = /\D/g;
 
   localValidationMessage = '';

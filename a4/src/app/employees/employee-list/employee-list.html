@@ -1,0 +1,150 @@
+<div class="entity-list-shell">
+    <h2>Employees List</h2>
+    <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
+    <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <div class="sort-controls">
+        <div class="control-field search-field">
+            <label for="employeeSearch">Search</label>
+            <input id="employeeSearch" type="search" [(ngModel)]="draftSearchTerm" (keyup.enter)="applySearch()" placeholder="Search any employee field" aria-label="Search employees by any column">
+        </div>
+
+        <div class="control-field">
+            <label for="jobFilter">Job</label>
+            <select id="jobFilter" [(ngModel)]="draftJobFilter">
+                <option value="">All jobs</option>
+                <option *ngFor="let job of jobOptions" [value]="job">{{ job }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="publisherFilter">Publisher</label>
+            <select id="publisherFilter" [(ngModel)]="draftPublisherFilter">
+                <option value="">All publishers</option>
+                <option *ngFor="let publisher of publisherOptions" [value]="publisher">{{ publisher }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortKey">Sort by</label>
+            <select id="sortKey" [(ngModel)]="draftSortKey">
+                <option value="emp_id">ID</option>
+                <option value="lname">Last Name</option>
+                <option value="fname">First Name</option>
+                <option value="job_desc">Job</option>
+                <option value="job_lvl">Job Level</option>
+                <option value="pub_name">Publisher</option>
+                <option value="hire_date">Hire Date</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortDirection">Order</label>
+            <select id="sortDirection" [(ngModel)]="draftSortDirection">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </div>
+
+        <button type="button" class="primary-btn" (click)="applySearch()">Search</button>
+        <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="saved-view-controls">
+        <label for="savedViewSelect">Saved views</label>
+        <select id="savedViewSelect" [ngModel]="selectedSavedViewName" (ngModelChange)="onSavedViewSelectionChange($event)">
+            <option value="">Select a saved view</option>
+            <option *ngFor="let view of savedViews" [value]="view.name">{{ view.name }}</option>
+        </select>
+        <button type="button" class="secondary-btn" (click)="applySavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Apply</button>
+        <button type="button" class="danger-btn" (click)="deleteSavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Delete</button>
+
+        <input type="text" [ngModel]="newSavedViewName" (ngModelChange)="newSavedViewName = $event" placeholder="New view name" aria-label="Name for saved view">
+        <button type="button" (click)="saveCurrentView()" [disabled]="!newSavedViewName.trim()">Save Current View</button>
+
+        <div class="control-field rows-per-page-field">
+            <label for="pageSizeSelect">Rows per page</label>
+            <select id="pageSizeSelect" [ngModel]="manualPageSize === null ? 'auto' : manualPageSize" (ngModelChange)="onManualPageSizeChange($event)">
+                <option value="auto">Auto-fit ({{ autoFitPageSize }})</option>
+                <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table style="min-width: 1050px;">
+            <colgroup>
+                <col style="width: 130px">
+                <col>
+                <col style="width: 150px">
+                <col style="width: 90px">
+                <col style="width: 150px">
+                <col style="width: 110px">
+                <col style="width: 250px">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('emp_id')" role="button" tabindex="0" (click)="sortByHeader('emp_id')" (keydown.enter)="sortByHeader('emp_id')" (keydown.space)="sortByHeader('emp_id'); $event.preventDefault()">
+                            ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('emp_id') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('lname')" role="button" tabindex="0" (click)="sortByHeader('lname')" (keydown.enter)="sortByHeader('lname')" (keydown.space)="sortByHeader('lname'); $event.preventDefault()">
+                            Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('lname') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('job_desc')" role="button" tabindex="0" (click)="sortByHeader('job_desc')" (keydown.enter)="sortByHeader('job_desc')" (keydown.space)="sortByHeader('job_desc'); $event.preventDefault()">
+                            Job <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('job_desc') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('job_lvl')" role="button" tabindex="0" (click)="sortByHeader('job_lvl')" (keydown.enter)="sortByHeader('job_lvl')" (keydown.space)="sortByHeader('job_lvl'); $event.preventDefault()">
+                            Level <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('job_lvl') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('pub_name')" role="button" tabindex="0" (click)="sortByHeader('pub_name')" (keydown.enter)="sortByHeader('pub_name')" (keydown.space)="sortByHeader('pub_name'); $event.preventDefault()">
+                            Publisher <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_name') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('hire_date')" role="button" tabindex="0" (click)="sortByHeader('hire_date')" (keydown.enter)="sortByHeader('hire_date')" (keydown.space)="sortByHeader('hire_date'); $event.preventDefault()">
+                            Hire Date <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('hire_date') }}</span>
+                        </span>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let employee of pagedEmployees; trackBy: trackByEmployeeId">
+                    <td><span [innerHTML]="getHighlightedText(employee.emp_id)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(getFullName(employee))"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(employee.job_desc)"></span></td>
+                    <td>{{ employee.job_lvl ?? '—' }}</td>
+                    <td><span [innerHTML]="getHighlightedText(employee.pub_name)"></span></td>
+                    <td>{{ formatDate(employee.hire_date) }}</td>
+                    <td class="actions-cell">
+                        <button [routerLink]="['/employees', employee.emp_id]">View Employee Details</button>
+                        <button [routerLink]="['/employees/edit', employee.emp_id]">Edit Employee</button>
+                        <button (click)="deleteEmployee(employee.emp_id)">Delete Employee</button>
+                    </td>
+                </tr>
+                <tr *ngIf="pagedEmployees.length === 0">
+                    <td colspan="7" class="empty-state">No employees found with the current filters.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" role="navigation" aria-label="Employee list pages">
+        <p class="pagination-status" aria-live="polite">
+            Showing {{ pageStartItem }}-{{ pageEndItem }} of {{ viewEmployees.length }}
+            | Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="pagination-actions">
+            <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
+    </div>
+</div>

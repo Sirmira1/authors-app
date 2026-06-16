@@ -1,0 +1,149 @@
+<div class="entity-list-shell">
+    <h2>Sales List</h2>
+    <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
+    <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <div class="sort-controls">
+        <div class="control-field search-field">
+            <label for="saleSearch">Search</label>
+            <input id="saleSearch" type="search" [(ngModel)]="draftSearchTerm" (keyup.enter)="applySearch()" placeholder="Search any sale field" aria-label="Search sales by any column">
+        </div>
+
+        <div class="control-field">
+            <label for="storeFilter">Store</label>
+            <select id="storeFilter" [(ngModel)]="draftStoreFilter">
+                <option value="">All stores</option>
+                <option *ngFor="let store of storeOptions" [value]="store">{{ store }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="titleFilter">Title</label>
+            <select id="titleFilter" [(ngModel)]="draftTitleFilter">
+                <option value="">All titles</option>
+                <option *ngFor="let title of titleOptions" [value]="title">{{ title }}</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortKey">Sort by</label>
+            <select id="sortKey" [(ngModel)]="draftSortKey">
+                <option value="stor_name">Store</option>
+                <option value="ord_num">Order #</option>
+                <option value="ord_date">Order Date</option>
+                <option value="qty">Quantity</option>
+                <option value="payterms">Pay Terms</option>
+                <option value="title">Title</option>
+            </select>
+        </div>
+
+        <div class="control-field">
+            <label for="sortDirection">Order</label>
+            <select id="sortDirection" [(ngModel)]="draftSortDirection">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </div>
+
+        <button type="button" class="primary-btn" (click)="applySearch()">Search</button>
+        <button type="button" class="secondary-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="saved-view-controls">
+        <label for="savedViewSelect">Saved views</label>
+        <select id="savedViewSelect" [ngModel]="selectedSavedViewName" (ngModelChange)="onSavedViewSelectionChange($event)">
+            <option value="">Select a saved view</option>
+            <option *ngFor="let view of savedViews" [value]="view.name">{{ view.name }}</option>
+        </select>
+        <button type="button" class="secondary-btn" (click)="applySavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Apply</button>
+        <button type="button" class="danger-btn" (click)="deleteSavedView(selectedSavedViewName)" [disabled]="!selectedSavedViewName">Delete</button>
+
+        <input type="text" [ngModel]="newSavedViewName" (ngModelChange)="newSavedViewName = $event" placeholder="New view name" aria-label="Name for saved view">
+        <button type="button" (click)="saveCurrentView()" [disabled]="!newSavedViewName.trim()">Save Current View</button>
+
+        <div class="control-field rows-per-page-field">
+            <label for="pageSizeSelect">Rows per page</label>
+            <select id="pageSizeSelect" [ngModel]="manualPageSize === null ? 'auto' : manualPageSize" (ngModelChange)="onManualPageSizeChange($event)">
+                <option value="auto">Auto-fit ({{ autoFitPageSize }})</option>
+                <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table style="min-width: 1050px;">
+            <colgroup>
+                <col style="width: 180px">
+                <col style="width: 110px">
+                <col style="width: 110px">
+                <col style="width: 80px">
+                <col style="width: 120px">
+                <col>
+                <col style="width: 250px">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('stor_name')" role="button" tabindex="0" (click)="sortByHeader('stor_name')" (keydown.enter)="sortByHeader('stor_name')" (keydown.space)="sortByHeader('stor_name'); $event.preventDefault()">
+                            Store <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('stor_name') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('ord_num')" role="button" tabindex="0" (click)="sortByHeader('ord_num')" (keydown.enter)="sortByHeader('ord_num')" (keydown.space)="sortByHeader('ord_num'); $event.preventDefault()">
+                            Order # <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('ord_num') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('ord_date')" role="button" tabindex="0" (click)="sortByHeader('ord_date')" (keydown.enter)="sortByHeader('ord_date')" (keydown.space)="sortByHeader('ord_date'); $event.preventDefault()">
+                            Order Date <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('ord_date') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('qty')" role="button" tabindex="0" (click)="sortByHeader('qty')" (keydown.enter)="sortByHeader('qty')" (keydown.space)="sortByHeader('qty'); $event.preventDefault()">
+                            Qty <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('qty') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('payterms')" role="button" tabindex="0" (click)="sortByHeader('payterms')" (keydown.enter)="sortByHeader('payterms')" (keydown.space)="sortByHeader('payterms'); $event.preventDefault()">
+                            Pay Terms <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('payterms') }}</span>
+                        </span>
+                    </th>
+                    <th>
+                        <span class="sortable-header" [class.active]="isActiveSort('title')" role="button" tabindex="0" (click)="sortByHeader('title')" (keydown.enter)="sortByHeader('title')" (keydown.space)="sortByHeader('title'); $event.preventDefault()">
+                            Title <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('title') }}</span>
+                        </span>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let sale of pagedSales; trackBy: trackBySaleKey">
+                    <td><span [innerHTML]="getHighlightedText(sale.stor_name)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(sale.ord_num)"></span></td>
+                    <td>{{ formatDate(sale.ord_date) }}</td>
+                    <td>{{ sale.qty }}</td>
+                    <td><span [innerHTML]="getHighlightedText(sale.payterms)"></span></td>
+                    <td><span [innerHTML]="getHighlightedText(sale.title)"></span></td>
+                    <td class="actions-cell">
+                        <button [routerLink]="['/sales', sale.stor_id, sale.ord_num]">View Sale Details</button>
+                        <button [routerLink]="['/sales/edit', sale.stor_id, sale.ord_num]">Edit Sale</button>
+                        <button (click)="deleteSale(sale)">Delete Sale</button>
+                    </td>
+                </tr>
+                <tr *ngIf="pagedSales.length === 0">
+                    <td colspan="7" class="empty-state">No sales found with the current filters.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" role="navigation" aria-label="Sale list pages">
+        <p class="pagination-status" aria-live="polite">
+            Showing {{ pageStartItem }}-{{ pageEndItem }} of {{ viewSales.length }}
+            | Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="pagination-actions">
+            <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+            <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
+    </div>
+</div>

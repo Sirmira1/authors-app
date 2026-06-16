@@ -1,0 +1,14 @@
+<div *ngIf="publisher; else notFound">
+    <app-publisher-form
+        [publisher]="publisher"
+        mode="edit"
+        [isSubmitting]="isSubmitting"
+        [errorMessage]="errorMessage"
+        (save)="savePublisher($event)"
+        (cancel)="goBack()">
+    </app-publisher-form>
+</div>
+<ng-template #notFound>
+    <p>Publisher not found.</p>
+    <button (click)="goBack()">Back to Publishers</button>
+</ng-template>

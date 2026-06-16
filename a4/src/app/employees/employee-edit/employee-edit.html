@@ -1,0 +1,14 @@
+<div *ngIf="employee; else notFound">
+    <app-employee-form
+        [employee]="employee"
+        mode="edit"
+        [isSubmitting]="isSubmitting"
+        [errorMessage]="errorMessage"
+        (save)="saveEmployee($event)"
+        (cancel)="goBack()">
+    </app-employee-form>
+</div>
+<ng-template #notFound>
+    <p>Employee not found.</p>
+    <button (click)="goBack()">Back to Employees</button>
+</ng-template>

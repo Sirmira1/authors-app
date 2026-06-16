@@ -1,0 +1,14 @@
+<div class="entity-list-shell" *ngIf="sale; else notFound">
+    <h2>Sale Details</h2>
+    <p><strong>Store:</strong> {{ sale.stor_name || '—' }} ({{ sale.stor_id }})</p>
+    <p><strong>Order Number:</strong> {{ sale.ord_num }}</p>
+    <p><strong>Order Date:</strong> {{ formatDate(sale.ord_date) }}</p>
+    <p><strong>Quantity:</strong> {{ sale.qty }}</p>
+    <p><strong>Pay Terms:</strong> {{ sale.payterms }}</p>
+    <p><strong>Title:</strong> {{ sale.title || sale.title_id }}</p>
+    <button type="button" routerLink="/sales">Back</button>
+</div>
+<ng-template #notFound>
+    <p>Sale not found.</p>
+    <button type="button" routerLink="/sales">Back</button>
+</ng-template>

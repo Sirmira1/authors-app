@@ -1,0 +1,8 @@
+<app-job-form
+    [job]="job"
+    mode="create"
+    [isSubmitting]="isSubmitting"
+    [errorMessage]="errorMessage"
+    (save)="createJob($event)"
+    (cancel)="goBack()">
+</app-job-form>
