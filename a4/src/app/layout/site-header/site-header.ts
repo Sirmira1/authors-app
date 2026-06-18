@@ -1,6 +1,7 @@
-import { Component, ElementRef, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../auth/auth';
 
 interface NavLink {
   label: string;
@@ -11,6 +12,8 @@ interface NavMenu {
   label: string;
   basePath: string;
   links: NavLink[];
+  /** When true, only management employees may see this menu. */
+  managementOnly?: boolean;
 }
 
 @Component({
@@ -40,7 +43,7 @@ interface NavMenu {
 
       <div class="gov-header__nav-wrap">
         <nav class="gov-nav" aria-label="Primary">
-          <div class="gov-nav__menu" *ngFor="let menu of menus">
+          <div class="gov-nav__menu" *ngFor="let menu of visibleMenus">
             <button
               type="button"
               class="gov-nav__trigger"
@@ -57,6 +60,16 @@ interface NavMenu {
                 <a role="menuitem" [routerLink]="item.link" (click)="closeMenu()">{{ item.label }}</a>
               </li>
             </ul>
+          </div>
+
+          <div class="gov-nav__auth">
+            <ng-container *ngIf="isLoggedIn; else signedOut">
+              <span class="gov-nav__user" title="Signed in">{{ currentUserName }}</span>
+              <button type="button" class="gov-nav__auth-btn" (click)="logout()">Sign Out</button>
+            </ng-container>
+            <ng-template #signedOut>
+              <a class="gov-nav__auth-btn" routerLink="/login" (click)="closeMenu()">Sign In</a>
+            </ng-template>
           </div>
         </nav>
       </div>
@@ -147,6 +160,38 @@ interface NavMenu {
 
       .gov-nav__menu {
         position: relative;
+      }
+
+      .gov-nav__auth {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .gov-nav__user {
+        font-weight: 700;
+        color: #1f3b54;
+        font-size: 0.95rem;
+      }
+
+      .gov-nav__auth-btn {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 0 0.9rem;
+        border-radius: 999px;
+        border: 1px solid #097a0a;
+        background: #097a0a;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .gov-nav__auth-btn:hover {
+        background: #0a6b0b;
       }
 
       .gov-nav__trigger {
@@ -249,6 +294,7 @@ export class SiteHeaderComponent {
     {
       label: 'Jobs',
       basePath: '/jobs',
+      managementOnly: true,
       links: [
         { label: 'Jobs Directory', link: '/jobs' },
         { label: 'Register Job', link: '/jobs/new' },
@@ -265,6 +311,7 @@ export class SiteHeaderComponent {
     {
       label: 'Employees',
       basePath: '/employees',
+      managementOnly: true,
       links: [
         { label: 'Employees Directory', link: '/employees' },
         { label: 'Register Employee', link: '/employees/new' },
@@ -281,6 +328,28 @@ export class SiteHeaderComponent {
   ];
 
   constructor(private elementRef: ElementRef<HTMLElement>, private router: Router) {}
+
+  private readonly auth = inject(AuthService);
+
+  /** Menus the current user is allowed to see (hides management-only when not management). */
+  get visibleMenus(): NavMenu[] {
+    const isManagement = this.auth.isManagement();
+    return this.menus.filter((menu) => !menu.managementOnly || isManagement);
+  }
+
+  get isLoggedIn(): boolean {
+    return this.auth.isLoggedIn();
+  }
+
+  get currentUserName(): string | null {
+    return this.auth.user()?.name ?? null;
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.closeMenu();
+    this.router.navigate(['/login']);
+  }
 
   onLogoError(): void {
     this.logoFailed = true;

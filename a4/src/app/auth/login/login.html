@@ -1,0 +1,42 @@
+<div class="login-shell">
+  <div class="login-card">
+    <h2>Employee Sign In</h2>
+    <p class="login-intro">
+      Sign in with your Employee ID. The Employees and Jobs sections are
+      restricted to management staff.
+    </p>
+
+    <p *ngIf="errorMessage()" class="login-error" role="alert">{{ errorMessage() }}</p>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" novalidate>
+      <div class="login-field">
+        <label for="empId">Employee ID</label>
+        <input
+          id="empId"
+          name="empId"
+          type="text"
+          autocomplete="username"
+          [(ngModel)]="empId"
+          placeholder="e.g. PTC11962M"
+          required
+        />
+      </div>
+
+      <div class="login-field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          [(ngModel)]="password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign In' }}
+      </button>
+    </form>
+  </div>
+</div>

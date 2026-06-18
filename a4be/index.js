@@ -1,10 +1,29 @@
 const express = require("express");
 const cors = require("cors");
 const sql = require("mssql/msnodesqlv8");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ---------------------------------------------------------------------------
+// AUTH CONFIG
+// ---------------------------------------------------------------------------
+// Secret used to sign/verify login tokens. Only the server knows it, so a
+// token cannot be forged by the browser. Comes from .env (never hard-code it).
+const JWT_SECRET = process.env.JWT_SECRET;
+// How long a login stays valid before the user must sign in again.
+const TOKEN_TTL = "8h";
+// These job_ids are "management" (CEO, CFO, Publisher, and every *Manager role).
+// Only these employees may view the Employees and Jobs pages/endpoints.
+const MANAGEMENT_JOB_IDS = new Set([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+
+if (!JWT_SECRET) {
+  console.error("Missing JWT_SECRET in .env — run the auth setup before starting.");
+  process.exit(1);
+}
 
 const ID_PATTERN = /^\d{3}-\d{2}-\d{4}$/;
 const STATE_PATTERN = /^[A-Za-z]{2}$/;
@@ -136,6 +155,122 @@ connectToDatabase();
 app.get("/", (req, res) => {
   res.send("Pubs API is running");
 });
+
+/**
+ * ======================================================================================================
+ * AUTHENTICATION  (login + middleware guards)
+ * ======================================================================================================
+ */
+
+// Decide if a given job_id is a management role.
+function isManagementJob(jobId) {
+  return MANAGEMENT_JOB_IDS.has(Number(jobId));
+}
+
+/**
+ * POST /api/auth/login
+ * Body: { emp_id, password }
+ * Flow: look up the employee -> compare password against the stored bcrypt hash
+ *       -> if good, sign a JWT that carries who they are + whether they're management
+ *       -> the browser stores that token and sends it back on every future request.
+ */
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    if (!pool) {
+      return res.status(500).json({ error: "Database connection not established" });
+    }
+
+    const empId = typeof req.body?.emp_id === "string" ? req.body.emp_id.trim() : "";
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+
+    if (!empId || !password) {
+      return res.status(400).json({ error: "Employee ID and password are required." });
+    }
+
+    const result = await pool.request()
+      .input("emp_id", sql.Char(9), empId)
+      .query(`
+        SELECT e.emp_id, e.fname, e.lname, e.job_id, j.job_desc, e.password_hash
+        FROM employee e LEFT JOIN jobs j ON e.job_id = j.job_id
+        WHERE e.emp_id = @emp_id`);
+
+    const employee = result.recordset[0];
+
+    // Same generic message whether the ID is unknown or the password is wrong,
+    // so attackers cannot tell which employee IDs exist.
+    if (!employee || !employee.password_hash) {
+      return res.status(401).json({ error: "Invalid employee ID or password." });
+    }
+
+    const passwordOk = await bcrypt.compare(password, employee.password_hash);
+    if (!passwordOk) {
+      return res.status(401).json({ error: "Invalid employee ID or password." });
+    }
+
+    const isManagement = isManagementJob(employee.job_id);
+
+    // The token's "payload" is signed, so the client can read it but cannot
+    // change it (e.g. flip isManagement to true) without the server noticing.
+    const token = jwt.sign(
+      {
+        emp_id: employee.emp_id.trim(),
+        name: `${employee.fname} ${employee.lname}`.trim(),
+        job_id: employee.job_id,
+        job_desc: employee.job_desc,
+        isManagement,
+      },
+      JWT_SECRET,
+      { expiresIn: TOKEN_TTL }
+    );
+
+    res.json({
+      token,
+      user: {
+        emp_id: employee.emp_id.trim(),
+        name: `${employee.fname} ${employee.lname}`.trim(),
+        job_id: employee.job_id,
+        job_desc: employee.job_desc,
+        isManagement,
+      },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Login failed. Please try again." });
+  }
+});
+
+/**
+ * Middleware: authenticateToken
+ * Reads the "Authorization: Bearer <token>" header, verifies the signature,
+ * and attaches the decoded user to req.user. Rejects with 401 if missing/invalid.
+ */
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"] || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required. Please log in." });
+  }
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ error: "Your session has expired. Please log in again." });
+  }
+}
+
+/**
+ * Middleware: requireManagement
+ * Must run AFTER authenticateToken. Blocks anyone who is not management with 403.
+ * This is the real security: even if the browser hides nothing, the API says no.
+ */
+function requireManagement(req, res, next) {
+  if (!req.user?.isManagement) {
+    return res.status(403).json({ error: "You must be in a management position to access this resource." });
+  }
+  next();
+}
 
 // get all authors
 app.get("/api/authors", async (req, res) => {
@@ -576,7 +711,7 @@ function validateJobPayload(job) {
 }
 
 // get all jobs
-app.get("/api/jobs", async (req, res) => {
+app.get("/api/jobs", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -590,7 +725,7 @@ app.get("/api/jobs", async (req, res) => {
 });
 
 // get job by id
-app.get("/api/jobs/:id", async (req, res) => {
+app.get("/api/jobs/:id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -611,7 +746,7 @@ app.get("/api/jobs/:id", async (req, res) => {
 });
 
 // create a new job (job_id is an identity column, generated by the database)
-app.post("/api/jobs", async (req, res) => {
+app.post("/api/jobs", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -636,7 +771,7 @@ app.post("/api/jobs", async (req, res) => {
 });
 
 // update a job
-app.put("/api/jobs/:id", async (req, res) => {
+app.put("/api/jobs/:id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -669,7 +804,7 @@ app.put("/api/jobs/:id", async (req, res) => {
 });
 
 // delete a job
-app.delete("/api/jobs/:id", async (req, res) => {
+app.delete("/api/jobs/:id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1014,7 +1149,7 @@ function bindEmployeeInputs(request, employee) {
 }
 
 // get all employees (joined with job description and publisher name)
-app.get("/api/employees", async (req, res) => {
+app.get("/api/employees", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1033,7 +1168,7 @@ app.get("/api/employees", async (req, res) => {
 });
 
 // generate unique employee id (3 letters + 5 digits + F/M)
-app.get("/api/employees/generate/id", async (req, res) => {
+app.get("/api/employees/generate/id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1070,7 +1205,7 @@ app.get("/api/employees/generate/id", async (req, res) => {
 });
 
 // get employee by id
-app.get("/api/employees/:id", async (req, res) => {
+app.get("/api/employees/:id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1088,7 +1223,7 @@ app.get("/api/employees/:id", async (req, res) => {
 });
 
 // create a new employee
-app.post("/api/employees", async (req, res) => {
+app.post("/api/employees", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1113,7 +1248,7 @@ app.post("/api/employees", async (req, res) => {
 });
 
 // update an employee
-app.put("/api/employees/:id", async (req, res) => {
+app.put("/api/employees/:id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1142,7 +1277,7 @@ app.put("/api/employees/:id", async (req, res) => {
 });
 
 // delete an employee
-app.delete("/api/employees/:id", async (req, res) => {
+app.delete("/api/employees/:id", authenticateToken, requireManagement, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });

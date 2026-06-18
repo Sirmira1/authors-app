@@ -1,0 +1,79 @@
+.login-shell {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--on-white, #fff);
+  border: 1px solid var(--on-border, #c9d4dd);
+  border-radius: var(--on-radius-lg, 12px);
+  box-shadow: var(--on-shadow, 0 8px 24px rgba(0, 0, 0, 0.08));
+  padding: 2rem;
+}
+
+.login-card h2 {
+  margin: 0 0 0.5rem;
+  color: var(--on-charcoal, #1f3b54);
+}
+
+.login-intro {
+  margin: 0 0 1.25rem;
+  color: #5a6b7a;
+  font-size: 0.92rem;
+}
+
+.login-error {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--on-radius-sm, 6px);
+  background: #fbeaea;
+  border: 1px solid #d99;
+  color: #8a2b2b;
+  font-size: 0.9rem;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.login-field label {
+  font-weight: 600;
+  color: var(--on-charcoal, #1f3b54);
+}
+
+.login-field input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--on-border, #c9d4dd);
+  border-radius: var(--on-radius-sm, 6px);
+  background: #f9fbfd;
+  color: var(--on-charcoal, #1f3b54);
+  font-size: 1rem;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 999px;
+  background: #097a0a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #0a6b0b;
+}
+
+.login-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

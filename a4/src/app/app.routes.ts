@@ -23,9 +23,14 @@ import { SaleListComponent } from './sales/sale-list/sale-list';
 import { SaleCreateComponent } from './sales/sale-create/sale-create';
 import { SaleEditComponent } from './sales/sale-edit/sale-edit';
 import { SaleDetailComponent } from './sales/sale-detail/sale-detail';
+import { LoginComponent } from './auth/login/login';
+import { ForbiddenComponent } from './auth/forbidden/forbidden';
+import { managementGuard } from './auth/management-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'authors', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'forbidden', component: ForbiddenComponent },
   { path: 'authors', component: AuthorListComponent },
   { path: 'authors/new', component: AuthorCreateComponent },
   { path: 'authors/edit/:id', component: AuthorEditComponent },
@@ -34,18 +39,18 @@ export const routes: Routes = [
   { path: 'publishers/new', component: PublisherCreateComponent },
   { path: 'publishers/edit/:id', component: PublisherEditComponent },
   { path: 'publishers/:id', component: PublisherDetailComponent },
-  { path: 'jobs', component: JobListComponent },
-  { path: 'jobs/new', component: JobCreateComponent },
-  { path: 'jobs/edit/:id', component: JobEditComponent },
-  { path: 'jobs/:id', component: JobDetailComponent },
+  { path: 'jobs', component: JobListComponent, canActivate: [managementGuard] },
+  { path: 'jobs/new', component: JobCreateComponent, canActivate: [managementGuard] },
+  { path: 'jobs/edit/:id', component: JobEditComponent, canActivate: [managementGuard] },
+  { path: 'jobs/:id', component: JobDetailComponent, canActivate: [managementGuard] },
   { path: 'titles', component: TitleListComponent },
   { path: 'titles/new', component: TitleCreateComponent },
   { path: 'titles/edit/:id', component: TitleEditComponent },
   { path: 'titles/:id', component: TitleDetailComponent },
-  { path: 'employees', component: EmployeeListComponent },
-  { path: 'employees/new', component: EmployeeCreateComponent },
-  { path: 'employees/edit/:id', component: EmployeeEditComponent },
-  { path: 'employees/:id', component: EmployeeDetailComponent },
+  { path: 'employees', component: EmployeeListComponent, canActivate: [managementGuard] },
+  { path: 'employees/new', component: EmployeeCreateComponent, canActivate: [managementGuard] },
+  { path: 'employees/edit/:id', component: EmployeeEditComponent, canActivate: [managementGuard] },
+  { path: 'employees/:id', component: EmployeeDetailComponent, canActivate: [managementGuard] },
   { path: 'sales', component: SaleListComponent },
   { path: 'sales/new', component: SaleCreateComponent },
   { path: 'sales/edit/:storId/:ordNum', component: SaleEditComponent },
