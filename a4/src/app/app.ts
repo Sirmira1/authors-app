@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SiteHeaderComponent } from './layout/site-header/site-header';
 import { SiteFooterComponent } from './layout/site-footer/site-footer';
+import { ThemeService } from './shared/theme.service';
+import { KeyboardShortcutsService } from './shared/keyboard-shortcuts.service';
 
 @Component({
   selector: 'app-root',
@@ -27,4 +29,8 @@ import { SiteFooterComponent } from './layout/site-footer/site-footer';
 })
 export class App {
   title = signal('pubs-authors-app');
+
+  // Inject services to initialize them on app startup
+  private readonly themeService = inject(ThemeService);
+  private readonly keyboardShortcuts = inject(KeyboardShortcutsService);
 }

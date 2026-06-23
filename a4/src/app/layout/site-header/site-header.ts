@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth';
+import { ThemeService } from '../../shared/theme.service';
 
 interface NavLink {
   label: string;
@@ -14,6 +15,8 @@ interface NavMenu {
   links: NavLink[];
   /** When true, only management employees may see this menu. */
   managementOnly?: boolean;
+  /** When true, only sales-authorized roles may see this menu. */
+  salesOnly?: boolean;
 }
 
 @Component({
@@ -63,6 +66,14 @@ interface NavMenu {
           </div>
 
           <div class="gov-nav__auth">
+            <button
+              type="button"
+              class="gov-nav__theme-btn"
+              [title]="theme.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+              (click)="toggleTheme()"
+            >
+              {{ theme.isDarkMode() ? 'Light' : 'Dark' }}
+            </button>
             <ng-container *ngIf="isLoggedIn; else signedOut">
               <span class="gov-nav__user" title="Signed in">{{ currentUserName }}</span>
               <button type="button" class="gov-nav__auth-btn" (click)="logout()">Sign Out</button>
@@ -149,6 +160,11 @@ interface NavMenu {
         border-bottom: 1px solid #c9d4dd;
       }
 
+      :host-context(.dark-mode) .gov-header__nav-wrap {
+        background: #1a1f2e;
+        border-bottom-color: #3f3f46;
+      }
+
       .gov-nav {
         max-width: 1500px;
         margin: 0 auto;
@@ -169,10 +185,45 @@ interface NavMenu {
         gap: 0.6rem;
       }
 
+      .gov-nav__theme-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        min-width: 40px;
+        padding: 0;
+        border-radius: 999px;
+        border: 1px solid #2179b7;
+        background: #fff;
+        color: #2179b7;
+        font-weight: 700;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .gov-nav__theme-btn:hover {
+        background: #e8f2f9;
+      }
+
+      :host-context(.dark-mode) .gov-nav__theme-btn {
+        border-color: #38b6ff;
+        background: #0f172a;
+        color: #38b6ff;
+      }
+
+      :host-context(.dark-mode) .gov-nav__theme-btn:hover {
+        background: #1a1f2e;
+      }
+
       .gov-nav__user {
         font-weight: 700;
         color: #1f3b54;
         font-size: 0.95rem;
+      }
+
+      :host-context(.dark-mode) .gov-nav__user {
+        color: #e8f5e9;
       }
 
       .gov-nav__auth-btn {
@@ -192,6 +243,16 @@ interface NavMenu {
 
       .gov-nav__auth-btn:hover {
         background: #0a6b0b;
+      }
+
+      :host-context(.dark-mode) .gov-nav__auth-btn {
+        border-color: #34d399;
+        background: #34d399;
+        color: #0f172a;
+      }
+
+      :host-context(.dark-mode) .gov-nav__auth-btn:hover {
+        background: #10b981;
       }
 
       .gov-nav__trigger {
@@ -215,6 +276,18 @@ interface NavMenu {
         background: #e8f2f9;
       }
 
+      :host-context(.dark-mode) .gov-nav__trigger {
+        border-color: #38b6ff;
+        background: #0f172a;
+        color: #38b6ff;
+      }
+
+      :host-context(.dark-mode) .gov-nav__trigger:hover,
+      :host-context(.dark-mode) .gov-nav__trigger.open,
+      :host-context(.dark-mode) .gov-nav__trigger.active {
+        background: #1a1f2e;
+      }
+
       .gov-nav__caret {
         font-size: 0.7rem;
       }
@@ -234,6 +307,12 @@ interface NavMenu {
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       }
 
+      :host-context(.dark-mode) .gov-nav__dropdown {
+        background: #1a1f2e;
+        border-color: #3f3f46;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      }
+
       .gov-nav__dropdown a {
         display: block;
         padding: 0.55rem 0.75rem;
@@ -244,8 +323,16 @@ interface NavMenu {
         white-space: nowrap;
       }
 
+      :host-context(.dark-mode) .gov-nav__dropdown a {
+        color: #e8f5e9;
+      }
+
       .gov-nav__dropdown a:hover {
         background: #e8f2f9;
+      }
+
+      :host-context(.dark-mode) .gov-nav__dropdown a:hover {
+        background: #0f172a;
       }
 
       @media (max-width: 640px) {
@@ -320,6 +407,7 @@ export class SiteHeaderComponent {
     {
       label: 'Sales',
       basePath: '/sales',
+      salesOnly: true,
       links: [
         { label: 'Sales Directory', link: '/sales' },
         { label: 'Register Sale', link: '/sales/new' },
@@ -330,11 +418,24 @@ export class SiteHeaderComponent {
   constructor(private elementRef: ElementRef<HTMLElement>, private router: Router) {}
 
   private readonly auth = inject(AuthService);
+  readonly theme = inject(ThemeService);
 
-  /** Menus the current user is allowed to see (hides management-only when not management). */
+  /** Menus the current user is allowed to see based on role-specific restrictions. */
   get visibleMenus(): NavMenu[] {
     const isManagement = this.auth.isManagement();
-    return this.menus.filter((menu) => !menu.managementOnly || isManagement);
+    const canAccessSales = this.auth.canAccessSales();
+
+    return this.menus.filter((menu) => {
+      if (menu.managementOnly && !isManagement) {
+        return false;
+      }
+
+      if (menu.salesOnly && !canAccessSales) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   get isLoggedIn(): boolean {
@@ -349,6 +450,10 @@ export class SiteHeaderComponent {
     this.auth.logout();
     this.closeMenu();
     this.router.navigate(['/login']);
+  }
+
+  toggleTheme(): void {
+    this.theme.toggleTheme();
   }
 
   onLogoError(): void {

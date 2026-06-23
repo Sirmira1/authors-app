@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { Author, AuthorService } from '../author';
+import { ListStatsComponent, type Stat } from '../../shared/list-stats.component';
 
 type SortKey = 'au_id' | 'au_fname' | 'au_lname' | 'phone' | 'address' | 'city' | 'state' | 'zip' | 'contract';
 type SortDirection = 'asc' | 'desc';
@@ -22,7 +23,7 @@ interface SavedView {
 
 @Component({
   selector: 'app-author-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ListStatsComponent],
   templateUrl: './author-list.html',
   styleUrl: './author-list.scss'
 })
@@ -170,6 +171,48 @@ export class AuthorListComponent implements OnInit {
     this.ensureCurrentPageInBounds();
   }
 
+  exportToExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.viewAuthors.length === 0) {
+      this.setSuccessMessage('No authors to export for the current filters.');
+      return;
+    }
+
+    const headers = ['Author ID', 'First Name', 'Last Name', 'Phone', 'Address', 'City', 'State', 'Zip', 'Contract'];
+    const rows = this.viewAuthors.map((author) => [
+      author.au_id,
+      author.au_fname,
+      author.au_lname,
+      author.phone,
+      author.address,
+      author.city,
+      author.state,
+      author.zip,
+      author.contract ? 'Yes' : 'No',
+    ]);
+
+    const csvLines = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.setAttribute('download', `authors-export-${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.setSuccessMessage('Authors exported successfully (Excel-compatible CSV).');
+  }
+
   saveCurrentView(): void {
     const trimmedName = this.newSavedViewName.trim();
 
@@ -246,6 +289,14 @@ export class AuthorListComponent implements OnInit {
 
   get stateOptions(): string[] {
     return this.getDistinctValues(this.authors.map(author => author.state));
+  }
+
+  get listStats(): Stat[] {
+    return [
+      { label: 'Total authors', value: this.authors.length },
+      { label: 'Showing', value: `${this.viewAuthors.length} / ${this.authors.length}` },
+      { label: 'Current page', value: `${this.currentPage} / ${this.totalPages}` },
+    ];
   }
 
   getHighlightedText(value: unknown): string {
@@ -499,6 +550,11 @@ export class AuthorListComponent implements OnInit {
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = (value ?? '').toString();
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   private escapeHtml(value: string): string {

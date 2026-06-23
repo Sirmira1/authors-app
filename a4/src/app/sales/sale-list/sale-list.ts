@@ -1,10 +1,11 @@
-import { Component, ElementRef, HostListener, Inject, NgZone, PLATFORM_ID, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Inject, NgZone, PLATFORM_ID, OnInit, ViewChild, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { Sale, SaleService } from '../sale';
+import { ListStatsComponent, type Stat } from '../../shared/list-stats.component';
 
 type SortKey = 'stor_name' | 'ord_num' | 'ord_date' | 'qty' | 'payterms' | 'title';
 type SortDirection = 'asc' | 'desc';
@@ -20,7 +21,7 @@ interface SavedView {
 
 @Component({
   selector: 'app-sale-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ListStatsComponent],
   templateUrl: './sale-list.html',
   styleUrl: './sale-list.scss'
 })
@@ -159,6 +160,48 @@ export class SaleListComponent implements OnInit {
     this.ensureCurrentPageInBounds();
   }
 
+  exportToExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.viewSales.length === 0) {
+      this.setSuccessMessage('No sales to export for the current filters.');
+      return;
+    }
+
+    const headers = ['Store ID', 'Store', 'Order Number', 'Order Date', 'Quantity', 'Pay Terms', 'Title ID', 'Title'];
+    const rows = this.viewSales.map((sale) => [
+      sale.stor_id,
+      sale.stor_name,
+      sale.ord_num,
+      this.formatDateForExport(sale.ord_date),
+      sale.qty,
+      sale.payterms,
+      sale.title_id,
+      sale.title,
+    ]);
+
+    const csvLines = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    // Prefix with UTF-8 BOM so Excel opens Unicode text correctly.
+    const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.setAttribute('download', `sales-export-${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.setSuccessMessage('Sales exported successfully (Excel-compatible CSV).');
+  }
+
   saveCurrentView(): void {
     const trimmedName = this.newSavedViewName.trim();
 
@@ -232,6 +275,14 @@ export class SaleListComponent implements OnInit {
 
   get titleOptions(): string[] {
     return this.getDistinctValues(this.sales.map(sale => sale.title ?? ''));
+  }
+
+  get listStats(): Stat[] {
+    return [
+      { label: 'Total sales', value: this.sales.length },
+      { label: 'Showing', value: `${this.viewSales.length} / ${this.sales.length}` },
+      { label: 'Current page', value: `${this.currentPage} / ${this.totalPages}` },
+    ];
   }
 
   getHighlightedText(value: unknown): string {
@@ -494,6 +545,25 @@ export class SaleListComponent implements OnInit {
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = (value ?? '').toString();
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  private formatDateForExport(value: string | null): string {
+    if (!value) {
+      return '';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    // Prefix with a tab so Excel keeps it as text (avoids ####### display).
+    return `\t${date.toISOString().slice(0, 10)}`;
   }
 
   private escapeHtml(value: string): string {

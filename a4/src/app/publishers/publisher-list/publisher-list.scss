@@ -315,11 +315,11 @@ button:active {
     transform: translateY(1px);
 }
 
-button:last-child {
+.actions-cell button:last-child {
     background: var(--on-green);
 }
 
-button:last-child:hover {
+.actions-cell button:last-child:hover {
     background: var(--on-green-strong);
 }
 
@@ -329,19 +329,19 @@ button:disabled {
 }
 
 .secondary-btn {
-    background: #6a7b8b;
+    background: var(--on-blue);
 }
 
 .secondary-btn:hover {
-    background: #566777;
+    background: var(--on-blue-strong);
 }
 
 .primary-btn {
-    background: var(--on-green);
+    background: var(--on-blue);
 }
 
 .primary-btn:hover {
-    background: var(--on-green-strong);
+    background: var(--on-blue-strong);
 }
 
 .danger-btn {

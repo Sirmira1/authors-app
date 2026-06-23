@@ -14,6 +14,10 @@
     box-sizing: border-box;
 }
 
+:host-context(.dark-mode) .entity-list-shell {
+    background: #1a1f2e;
+}
+
 .entity-list-shell h2 {
     margin-bottom: var(--on-space-5);
     color: var(--on-charcoal);
@@ -21,24 +25,21 @@
     border-bottom: 3px solid var(--on-green);
 }
 
-.delete-warning {
-    margin: 0 0 var(--on-space-4) 0;
-    padding: var(--on-space-3) var(--on-space-4);
-    border: 1px solid #f3b3b3;
-    border-radius: var(--on-radius-sm);
-    background: #fff4f4;
-    color: #8f1f1f;
-    font-weight: 600;
+:host-context(.dark-mode) .entity-list-shell h2 {
+    color: #e8f5e9;
+    border-bottom-color: #34d399;
 }
 
-.success-banner {
-    margin: 0 0 var(--on-space-4) 0;
-    padding: var(--on-space-3) var(--on-space-4);
-    border: 1px solid #8bc48b;
-    border-radius: var(--on-radius-sm);
-    background: #edf9ed;
-    color: #0f5b17;
-    font-weight: 600;
+:host-context(.dark-mode) .delete-warning {
+    border-color: #8b4a4a;
+    background: #3a1f1f;
+    color: #ffb3b3;
+}
+
+:host-context(.dark-mode) .success-banner {
+    border-color: #4a8b4a;
+    background: #1f3a1f;
+    color: #8bffb3;
 }
 
 .success-banner:focus-visible {
@@ -62,6 +63,10 @@
 .sort-controls label {
     font-weight: 600;
     color: var(--on-charcoal);
+}
+
+:host-context(.dark-mode) .sort-controls label {
+    color: #e8f5e9;
 }
 
 .sort-controls .control-field {
@@ -93,6 +98,12 @@
     text-overflow: ellipsis;
 }
 
+:host-context(.dark-mode) .sort-controls select {
+    background: #0f172a;
+    color: #e8f5e9;
+    border-color: #3f3f46;
+}
+
 .sort-controls input[type="search"] {
     min-width: 150px;
     padding: 0.4rem 0.5rem;
@@ -100,6 +111,12 @@
     border-radius: var(--on-radius-sm);
     background: #f9fbfd;
     color: var(--on-charcoal);
+}
+
+:host-context(.dark-mode) .sort-controls input[type="search"] {
+    background: #0f172a;
+    color: #e8f5e9;
+    border-color: #3f3f46;
 }
 
 .saved-view-controls {
@@ -128,6 +145,13 @@
     border-radius: var(--on-radius-sm);
     background: #f9fbfd;
     color: var(--on-charcoal);
+}
+
+:host-context(.dark-mode) .saved-view-controls select,
+:host-context(.dark-mode) .saved-view-controls input[type="text"] {
+    background: #0f172a;
+    color: #e8f5e9;
+    border-color: #3f3f46;
 }
 
 .pagination {
@@ -166,6 +190,11 @@ table {
     background: var(--on-white);
 }
 
+:host-context(.dark-mode) table {
+    background: #0f172a;
+    border-color: #3f3f46;
+}
+
 thead th {
     padding: 0.55rem 0.7rem;
     text-align: left;
@@ -175,6 +204,11 @@ thead th {
     background: var(--on-charcoal);
     border-bottom: 3px solid var(--on-green);
     white-space: nowrap;
+}
+
+:host-context(.dark-mode) thead th {
+    background: #1a2332;
+    border-bottom-color: #34d399;
 }
 
 .sortable-header {
@@ -215,6 +249,11 @@ thead th {
     border-radius: 2px;
 }
 
+:host-context(.dark-mode) ::ng-deep mark {
+    background: #8b7a00;
+    color: #fef3c7;
+}
+
 tbody td {
     padding: 0.45rem 0.7rem;
     font-size: 0.93rem;
@@ -222,6 +261,12 @@ tbody td {
     border-bottom: 1px solid #dde5eb;
     vertical-align: middle;
     white-space: normal;
+    color: var(--on-charcoal);
+}
+
+:host-context(.dark-mode) tbody td {
+    border-bottom-color: #3f3f46;
+    color: #e8f5e9;
 }
 
 .empty-state {
@@ -231,12 +276,37 @@ tbody td {
     white-space: normal;
 }
 
+:host-context(.dark-mode) .empty-state {
+    color: #a1a5ab;
+}
+
 tbody tr:nth-child(even) {
     background: #f7fafc;
 }
 
+:host-context(.dark-mode) tbody tr:nth-child(even) {
+    background: #1a2332;
+}
+
 tbody tr:hover {
     background: var(--on-blue-soft);
+}
+
+:host-context(.dark-mode) tbody tr:hover {
+    background: #243447;
+}
+
+:host-context(.dark-mode) .sortable-header {
+    color: #e8f5e9;
+}
+
+:host-context(.dark-mode) .sortable-header:hover,
+:host-context(.dark-mode) .sortable-header:focus-visible {
+    color: #38b6ff;
+}
+
+:host-context(.dark-mode) .sortable-header:focus-visible {
+    outline-color: #38b6ff;
 }
 
 .actions-cell {
@@ -278,6 +348,26 @@ button:active {
 button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+:host-context(.dark-mode) button {
+    background: var(--on-blue);
+}
+
+:host-context(.dark-mode) button:hover {
+    background: var(--on-blue-strong);
+}
+
+:host-context(.dark-mode) button:active {
+    background: var(--on-blue-strong);
+}
+
+:host-context(.dark-mode) .actions-cell button:last-child {
+    background: var(--on-green);
+}
+
+:host-context(.dark-mode) .actions-cell button:last-child:hover {
+    background: var(--on-green-strong);
 }
 
 .actions-cell button:last-child {

@@ -19,6 +19,9 @@ const TOKEN_TTL = "8h";
 // These job_ids are "management" (CEO, CFO, Publisher, and every *Manager role).
 // Only these employees may view the Employees and Jobs pages/endpoints.
 const MANAGEMENT_JOB_IDS = new Set([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+// These job_ids may view Sales pages/endpoints per assignment rules:
+// CFO, Sales Representative, Business Operations Manager, Marketing Manager.
+const SALES_ACCESS_JOB_IDS = new Set([3, 4, 7, 13]);
 
 if (!JWT_SECRET) {
   console.error("Missing JWT_SECRET in .env — run the auth setup before starting.");
@@ -167,6 +170,11 @@ function isManagementJob(jobId) {
   return MANAGEMENT_JOB_IDS.has(Number(jobId));
 }
 
+// Decide if a given job_id is allowed to access Sales.
+function isSalesAccessJob(jobId) {
+  return SALES_ACCESS_JOB_IDS.has(Number(jobId));
+}
+
 /**
  * POST /api/auth/login
  * Body: { emp_id, password }
@@ -208,6 +216,7 @@ app.post("/api/auth/login", async (req, res) => {
     }
 
     const isManagement = isManagementJob(employee.job_id);
+    const isSalesAccess = isSalesAccessJob(employee.job_id);
 
     // The token's "payload" is signed, so the client can read it but cannot
     // change it (e.g. flip isManagement to true) without the server noticing.
@@ -218,6 +227,7 @@ app.post("/api/auth/login", async (req, res) => {
         job_id: employee.job_id,
         job_desc: employee.job_desc,
         isManagement,
+        isSalesAccess,
       },
       JWT_SECRET,
       { expiresIn: TOKEN_TTL }
@@ -231,6 +241,7 @@ app.post("/api/auth/login", async (req, res) => {
         job_id: employee.job_id,
         job_desc: employee.job_desc,
         isManagement,
+        isSalesAccess,
       },
     });
   } catch (err) {
@@ -268,6 +279,20 @@ function authenticateToken(req, res, next) {
 function requireManagement(req, res, next) {
   if (!req.user?.isManagement) {
     return res.status(403).json({ error: "You must be in a management position to access this resource." });
+  }
+  next();
+}
+
+/**
+ * Middleware: requireSalesAccess
+ * Must run AFTER authenticateToken. Blocks users outside approved sales roles.
+ */
+function requireSalesAccess(req, res, next) {
+  const hasSalesAccess = req.user?.isSalesAccess || isSalesAccessJob(req.user?.job_id);
+  if (!hasSalesAccess) {
+    return res.status(403).json({
+      error: "You must be CFO, Sales Representative, Business Operations Manager, or Marketing Manager to access this resource.",
+    });
   }
   next();
 }
@@ -832,7 +857,7 @@ app.delete("/api/jobs/:id", authenticateToken, requireManagement, async (req, re
 // Stores (read-only lookup, used to populate the sales store dropdown)
 // ---------------------------------------------------------------------------
 
-app.get("/api/stores", async (req, res) => {
+app.get("/api/stores", authenticateToken, requireSalesAccess, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1350,7 +1375,7 @@ function validateSalePayload(sale, options = { includeKey: true }) {
 }
 
 // get all sales (joined with store name and title)
-app.get("/api/sales", async (req, res) => {
+app.get("/api/sales", authenticateToken, requireSalesAccess, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1369,7 +1394,7 @@ app.get("/api/sales", async (req, res) => {
 });
 
 // get sale by composite key
-app.get("/api/sales/:storId/:ordNum", async (req, res) => {
+app.get("/api/sales/:storId/:ordNum", authenticateToken, requireSalesAccess, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1389,7 +1414,7 @@ app.get("/api/sales/:storId/:ordNum", async (req, res) => {
 });
 
 // create a new sale
-app.post("/api/sales", async (req, res) => {
+app.post("/api/sales", authenticateToken, requireSalesAccess, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1428,7 +1453,7 @@ app.post("/api/sales", async (req, res) => {
 });
 
 // update a sale (store + order number identify the row and are not changed)
-app.put("/api/sales/:storId/:ordNum", async (req, res) => {
+app.put("/api/sales/:storId/:ordNum", authenticateToken, requireSalesAccess, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });
@@ -1462,7 +1487,7 @@ app.put("/api/sales/:storId/:ordNum", async (req, res) => {
 });
 
 // delete a sale
-app.delete("/api/sales/:storId/:ordNum", async (req, res) => {
+app.delete("/api/sales/:storId/:ordNum", authenticateToken, requireSalesAccess, async (req, res) => {
   try {
     if (!pool) {
       return res.status(500).json({ error: 'Database connection not established' });

@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { Employee, EmployeeService } from '../employee';
+import { ListStatsComponent, type Stat } from '../../shared/list-stats.component';
 
 type SortKey = 'emp_id' | 'lname' | 'fname' | 'job_desc' | 'job_lvl' | 'pub_name' | 'hire_date';
 type SortDirection = 'asc' | 'desc';
@@ -20,7 +21,7 @@ interface SavedView {
 
 @Component({
   selector: 'app-employee-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ListStatsComponent],
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.scss'
 })
@@ -159,6 +160,47 @@ export class EmployeeListComponent implements OnInit {
     this.ensureCurrentPageInBounds();
   }
 
+  exportToExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.viewEmployees.length === 0) {
+      this.setSuccessMessage('No employees to export for the current filters.');
+      return;
+    }
+
+    const headers = ['Employee ID', 'First Name', 'Middle Initial', 'Last Name', 'Job', 'Job Level', 'Publisher', 'Hire Date'];
+    const rows = this.viewEmployees.map((employee) => [
+      employee.emp_id,
+      employee.fname,
+      employee.minit ?? '',
+      employee.lname,
+      employee.job_desc ?? '',
+      employee.job_lvl ?? '',
+      employee.pub_name ?? '',
+      employee.hire_date,
+    ]);
+
+    const csvLines = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.setAttribute('download', `employees-export-${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.setSuccessMessage('Employees exported successfully (Excel-compatible CSV).');
+  }
+
   saveCurrentView(): void {
     const trimmedName = this.newSavedViewName.trim();
 
@@ -232,6 +274,14 @@ export class EmployeeListComponent implements OnInit {
 
   get publisherOptions(): string[] {
     return this.getDistinctValues(this.employees.map(employee => employee.pub_name ?? ''));
+  }
+
+  get listStats(): Stat[] {
+    return [
+      { label: 'Total employees', value: this.employees.length },
+      { label: 'Showing', value: `${this.viewEmployees.length} / ${this.employees.length}` },
+      { label: 'Current page', value: `${this.currentPage} / ${this.totalPages}` },
+    ];
   }
 
   getHighlightedText(value: unknown): string {
@@ -498,6 +548,11 @@ export class EmployeeListComponent implements OnInit {
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = (value ?? '').toString();
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   private escapeHtml(value: string): string {

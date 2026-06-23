@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { Title, TitleService } from '../title';
+import { ListStatsComponent, type Stat } from '../../shared/list-stats.component';
 
 type SortKey = 'title_id' | 'title' | 'type' | 'pub_name' | 'price' | 'ytd_sales' | 'pubdate';
 type SortDirection = 'asc' | 'desc';
@@ -20,7 +21,7 @@ interface SavedView {
 
 @Component({
   selector: 'app-title-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ListStatsComponent],
   templateUrl: './title-list.html',
   styleUrl: './title-list.scss'
 })
@@ -159,6 +160,46 @@ export class TitleListComponent implements OnInit {
     this.ensureCurrentPageInBounds();
   }
 
+  exportToExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.viewTitles.length === 0) {
+      this.setSuccessMessage('No titles to export for the current filters.');
+      return;
+    }
+
+    const headers = ['Title ID', 'Title', 'Type', 'Publisher', 'Price', 'YTD Sales', 'Publish Date'];
+    const rows = this.viewTitles.map((title) => [
+      title.title_id,
+      title.title,
+      title.type,
+      title.pub_name ?? '',
+      title.price ?? '',
+      title.ytd_sales ?? '',
+      title.pubdate,
+    ]);
+
+    const csvLines = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.setAttribute('download', `titles-export-${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.setSuccessMessage('Titles exported successfully (Excel-compatible CSV).');
+  }
+
   saveCurrentView(): void {
     const trimmedName = this.newSavedViewName.trim();
 
@@ -232,6 +273,14 @@ export class TitleListComponent implements OnInit {
 
   get publisherOptions(): string[] {
     return this.getDistinctValues(this.titles.map(title => title.pub_name ?? ''));
+  }
+
+  get listStats(): Stat[] {
+    return [
+      { label: 'Total titles', value: this.titles.length },
+      { label: 'Showing', value: `${this.viewTitles.length} / ${this.titles.length}` },
+      { label: 'Current page', value: `${this.currentPage} / ${this.totalPages}` },
+    ];
   }
 
   getHighlightedText(value: unknown): string {
@@ -531,6 +580,11 @@ export class TitleListComponent implements OnInit {
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = (value ?? '').toString();
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   private escapeHtml(value: string): string {

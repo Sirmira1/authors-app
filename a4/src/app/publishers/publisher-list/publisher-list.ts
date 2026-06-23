@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { Publisher, PublisherService } from '../publisher';
+import { ListStatsComponent, type Stat } from '../../shared/list-stats.component';
 
 type SortKey = 'pub_id' | 'pub_name' | 'city' | 'state' | 'country';
 type SortDirection = 'asc' | 'desc';
@@ -21,7 +22,7 @@ interface SavedView {
 
 @Component({
   selector: 'app-publisher-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ListStatsComponent],
   templateUrl: './publisher-list.html',
   styleUrl: './publisher-list.scss'
 })
@@ -169,6 +170,44 @@ export class PublisherListComponent implements OnInit {
     this.ensureCurrentPageInBounds();
   }
 
+  exportToExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.viewPublishers.length === 0) {
+      this.setSuccessMessage('No publishers to export for the current filters.');
+      return;
+    }
+
+    const headers = ['Publisher ID', 'Name', 'City', 'State', 'Country'];
+    const rows = this.viewPublishers.map((publisher) => [
+      publisher.pub_id,
+      publisher.pub_name,
+      publisher.city,
+      publisher.state,
+      publisher.country,
+    ]);
+
+    const csvLines = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.setAttribute('download', `publishers-export-${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.setSuccessMessage('Publishers exported successfully (Excel-compatible CSV).');
+  }
+
   saveCurrentView(): void {
     const trimmedName = this.newSavedViewName.trim();
 
@@ -249,6 +288,14 @@ export class PublisherListComponent implements OnInit {
 
   get countryOptions(): string[] {
     return this.getDistinctValues(this.publishers.map(publisher => publisher.country));
+  }
+
+  get listStats(): Stat[] {
+    return [
+      { label: 'Total publishers', value: this.publishers.length },
+      { label: 'Showing', value: `${this.viewPublishers.length} / ${this.publishers.length}` },
+      { label: 'Current page', value: `${this.currentPage} / ${this.totalPages}` },
+    ];
   }
 
   getHighlightedText(value: unknown): string {
@@ -493,6 +540,11 @@ export class PublisherListComponent implements OnInit {
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = (value ?? '').toString();
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   private escapeHtml(value: string): string {

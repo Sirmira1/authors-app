@@ -1,5 +1,6 @@
 /* Ontario government-inspired design system */
-:root {
+:root,
+.light-mode {
     --on-green: #097a0a;
     --on-charcoal: #333;
     --on-white: #fff;
@@ -27,6 +28,35 @@
     --on-space-8: 2rem;
 }
 
+/* Dark mode color scheme */
+.dark-mode {
+    --on-green: #34d399;
+    --on-charcoal: #e8f5e9;
+    --on-white: #0f172a;
+    --on-blue: #38b6ff;
+
+    --on-green-strong: #10b981;
+    --on-blue-strong: #0ea5e9;
+    --on-blue-soft: #0c2d48;
+    --on-border: #3f3f46;
+    --on-bg: #0f172a;
+    --on-muted: #a1a5ab;
+    --on-focus: #fcd34d;
+
+    --on-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    --on-radius-sm: 4px;
+    --on-radius-md: 8px;
+    --on-radius-lg: 12px;
+
+    --on-space-1: 0.25rem;
+    --on-space-2: 0.5rem;
+    --on-space-3: 0.75rem;
+    --on-space-4: 1rem;
+    --on-space-5: 1.25rem;
+    --on-space-6: 1.5rem;
+    --on-space-8: 2rem;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -41,6 +71,14 @@ body {
         linear-gradient(180deg, #dde8ef 0, #eef3f6 220px),
         var(--on-bg);
     line-height: 1.45;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark-mode,
+html.dark-mode body {
+    background:
+        linear-gradient(180deg, #0a0f1a 0, #0f172a 220px),
+        var(--on-bg);
 }
 
 h2 {
@@ -59,6 +97,71 @@ textarea {
 :focus-visible {
     outline: 3px solid var(--on-focus);
     outline-offset: 2px;
+}
+
+/* Dark mode table/list overrides with high specificity */
+html.dark-mode table {
+    background: #0f172a !important;
+    border-color: #3f3f46 !important;
+}
+
+html.dark-mode thead th {
+    background: #1a2332 !important;
+    border-bottom-color: #34d399 !important;
+}
+
+html.dark-mode tbody tr:nth-child(odd) {
+    background: #0f172a !important;
+}
+
+html.dark-mode tbody tr:nth-child(even) {
+    background: #1a2332 !important;
+}
+
+html.dark-mode tbody tr:hover {
+    background: #243447 !important;
+}
+
+html.dark-mode tbody td,
+html.dark-mode tbody th {
+    border-bottom-color: #3f3f46 !important;
+    color: #e8f5e9 !important;
+}
+
+html.dark-mode .sortable-header {
+    color: #e8f5e9 !important;
+}
+
+html.dark-mode .sortable-header:hover,
+html.dark-mode .sortable-header:focus-visible {
+    color: #38b6ff !important;
+}
+
+html.dark-mode mark {
+    background: #8b7a00 !important;
+    color: #fef3c7 !important;
+}
+
+html.dark-mode .entity-list-shell {
+    background: #1a1f2e !important;
+}
+
+html.dark-mode .entity-list-shell h2 {
+    color: #e8f5e9 !important;
+    border-bottom-color: #34d399 !important;
+}
+
+html.dark-mode .sort-controls label {
+    color: #e8f5e9 !important;
+}
+
+html.dark-mode .sort-controls select,
+html.dark-mode .sort-controls input[type="search"],
+html.dark-mode .saved-view-controls select,
+html.dark-mode .saved-view-controls input[type="text"] {
+    background: #0f172a !important;
+    color: #e8f5e9 !important;
+    border-color: #3f3f46 !important;
 }
 
 a {

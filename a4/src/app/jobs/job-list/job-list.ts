@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { Job, JobService } from '../job';
+import { ListStatsComponent, type Stat } from '../../shared/list-stats.component';
 
 type SortKey = 'job_id' | 'job_desc' | 'min_lvl' | 'max_lvl';
 type SortDirection = 'asc' | 'desc';
@@ -18,7 +19,7 @@ interface SavedView {
 
 @Component({
   selector: 'app-job-list',
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ListStatsComponent],
   templateUrl: './job-list.html',
   styleUrl: './job-list.scss'
 })
@@ -147,6 +148,43 @@ export class JobListComponent implements OnInit {
     this.ensureCurrentPageInBounds();
   }
 
+  exportToExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    if (this.viewJobs.length === 0) {
+      this.setSuccessMessage('No jobs to export for the current filters.');
+      return;
+    }
+
+    const headers = ['Job ID', 'Description', 'Min Level', 'Max Level'];
+    const rows = this.viewJobs.map((job) => [
+      job.job_id,
+      job.job_desc,
+      job.min_lvl,
+      job.max_lvl,
+    ]);
+
+    const csvLines = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsv(value)).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.setAttribute('download', `jobs-export-${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.setSuccessMessage('Jobs exported successfully (Excel-compatible CSV).');
+  }
+
   saveCurrentView(): void {
     const trimmedName = this.newSavedViewName.trim();
 
@@ -206,6 +244,14 @@ export class JobListComponent implements OnInit {
 
   get highlightedSearchTerm(): string {
     return this.searchTerm.trim();
+  }
+
+  get listStats(): Stat[] {
+    return [
+      { label: 'Total jobs', value: this.jobs.length },
+      { label: 'Showing', value: `${this.viewJobs.length} / ${this.jobs.length}` },
+      { label: 'Current page', value: `${this.currentPage} / ${this.totalPages}` },
+    ];
   }
 
   getHighlightedText(value: unknown): string {
@@ -437,6 +483,11 @@ export class JobListComponent implements OnInit {
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeCsv(value: unknown): string {
+    const text = (value ?? '').toString();
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   private escapeHtml(value: string): string {

@@ -26,6 +26,7 @@ import { SaleDetailComponent } from './sales/sale-detail/sale-detail';
 import { LoginComponent } from './auth/login/login';
 import { ForbiddenComponent } from './auth/forbidden/forbidden';
 import { managementGuard } from './auth/management-guard';
+import { salesGuard } from './auth/sales-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'authors', pathMatch: 'full' },
@@ -51,8 +52,8 @@ export const routes: Routes = [
   { path: 'employees/new', component: EmployeeCreateComponent, canActivate: [managementGuard] },
   { path: 'employees/edit/:id', component: EmployeeEditComponent, canActivate: [managementGuard] },
   { path: 'employees/:id', component: EmployeeDetailComponent, canActivate: [managementGuard] },
-  { path: 'sales', component: SaleListComponent },
-  { path: 'sales/new', component: SaleCreateComponent },
-  { path: 'sales/edit/:storId/:ordNum', component: SaleEditComponent },
-  { path: 'sales/:storId/:ordNum', component: SaleDetailComponent }
+  { path: 'sales', component: SaleListComponent, canActivate: [salesGuard] },
+  { path: 'sales/new', component: SaleCreateComponent, canActivate: [salesGuard] },
+  { path: 'sales/edit/:storId/:ordNum', component: SaleEditComponent, canActivate: [salesGuard] },
+  { path: 'sales/:storId/:ordNum', component: SaleDetailComponent, canActivate: [salesGuard] }
 ];

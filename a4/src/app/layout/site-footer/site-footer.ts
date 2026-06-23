@@ -20,6 +20,12 @@ import { Component } from '@angular/core';
         color: var(--on-white);
       }
 
+      :host-context(.dark-mode) .gov-footer {
+        border-top-color: #34d399;
+        background: #0b1220;
+        color: #e8f5e9;
+      }
+
       .gov-footer__inner {
         max-width: 1200px;
         margin: 0 auto;

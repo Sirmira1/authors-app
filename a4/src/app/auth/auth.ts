@@ -10,6 +10,7 @@ export interface AuthUser {
   job_id: number;
   job_desc: string | null;
   isManagement: boolean;
+  isSalesAccess?: boolean;
 }
 
 interface LoginResponse {
@@ -19,6 +20,7 @@ interface LoginResponse {
 
 const TOKEN_KEY = 'pubs-auth-token';
 const USER_KEY = 'pubs-auth-user';
+const SALES_ACCESS_JOB_IDS = new Set([3, 4, 7, 13]);
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -38,6 +40,17 @@ export class AuthService {
   readonly isLoggedIn = computed(() => this.userSignal() !== null);
   /** True only for management employees (used to show/guard sensitive pages). */
   readonly isManagement = computed(() => this.userSignal()?.isManagement === true);
+  /** True only for roles allowed to access the Sales section. */
+  readonly canAccessSales = computed(() => {
+    const user = this.userSignal();
+    if (!user) {
+      return false;
+    }
+
+    // Fallback to job_id so existing cached sessions still work even when the
+    // backend has not yet started returning isSalesAccess.
+    return user.isSalesAccess === true || SALES_ACCESS_JOB_IDS.has(user.job_id);
+  });
 
   /** The raw JWT to attach to API requests (null when logged out). */
   get token(): string | null {

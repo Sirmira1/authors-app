@@ -10,10 +10,12 @@ import { AuthService } from '../auth';
     <div class="forbidden-shell">
       <h2>Access restricted</h2>
       <p>
-        The Employees and Jobs sections are available to management staff only.
+        You do not have permission to view this page.
+        Employees and Jobs are restricted to management roles.
+        Sales is restricted to CFO, Sales Representative, Business Operations Manager, and Marketing Manager roles.
         @if (auth.user(); as u) {
           You are signed in as <strong>{{ u.name }}</strong> ({{ u.job_desc }}),
-          which does not have management access.
+          which does not have access to this section.
         }
       </p>
       <a routerLink="/authors" class="forbidden-link">Back to Authors</a>

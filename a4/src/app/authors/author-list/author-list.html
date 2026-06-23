@@ -2,6 +2,7 @@
     <h2>Authors List</h2>
     <p #successBanner *ngIf="successMessage" class="success-banner" role="status" aria-live="polite" tabindex="-1">{{ successMessage }}</p>
     <p #deleteWarningBanner *ngIf="deleteWarning" class="delete-warning" role="alert" tabindex="-1">{{ deleteWarning }}</p>
+    <app-list-stats [stats]="listStats"></app-list-stats>
     <div class="sort-controls">
         <div class="control-field search-field">
             <label for="authorSearch">Search</label>
@@ -187,6 +188,7 @@
             | Page {{ currentPage }} of {{ totalPages }}
         </p>
         <div class="pagination-actions">
+            <button type="button" class="secondary-btn" (click)="exportToExcel()">Export Excel</button>
             <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Previous</button>
             <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
         </div>
