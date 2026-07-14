@@ -13,7 +13,7 @@ export interface Job {
 })
 
 export class JobService {
-  private apiUrl = 'http://localhost:3000/api/jobs';
+  private apiUrl = 'http://localhost:5232/api/jobs';
 
   constructor(private http: HttpClient) {}
 

@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
     <footer class="gov-footer" role="contentinfo">
       <div class="gov-footer__inner">
         <p>Government of Ontario Services</p>
-        <p>Author Management Portal</p>
+        <p>Pubs Management Portal</p>
       </div>
     </footer>
   `,

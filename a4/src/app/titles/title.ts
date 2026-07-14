@@ -20,7 +20,7 @@ export interface Title {
 })
 
 export class TitleService {
-  private apiUrl = 'http://localhost:3000/api/titles';
+  private apiUrl = 'http://localhost:5232/api/titles';
 
   constructor(private http: HttpClient) {}
 

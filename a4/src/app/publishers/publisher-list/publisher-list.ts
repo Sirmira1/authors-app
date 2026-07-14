@@ -337,6 +337,14 @@ export class PublisherListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getAriaSort(sortKey: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortKey !== sortKey) {
+      return 'none';
+    }
+
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   trackByPublisherId(_index: number, publisher: Publisher): string {
     return publisher.pub_id;
   }

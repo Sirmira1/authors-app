@@ -1,22 +1,22 @@
 <form #titleForm="ngForm" (ngSubmit)="handleSubmit(titleForm)">
     <h2>{{ mode === 'create' ? 'Create Title' : 'Edit Title' }}</h2>
     <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
-    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+    <p class="form-error" role="alert" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
         {{ errorMessage || localValidationMessage }}
     </p>
 
-    <label for="titleId">Title ID: <span class="required">*</span></label>
+    <label for="titleId">Title ID: <span class="required" aria-hidden="true">*</span></label>
     <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
-    <input type="text" id="titleId" [(ngModel)]="formTitle.title_id" #titleIdModel="ngModel" name="title_id" required pattern="^[A-Za-z]{2}\d{4}$" title="Use 2 letters followed by 4 digits" placeholder="BU1032" [class.input-invalid]="showFieldError(titleIdModel)" disabled>
-    <p class="field-error" *ngIf="showFieldError(titleIdModel)">Incorrect format. Use 2 letters then 4 digits, for example BU1032.</p>
+    <input type="text" id="titleId" [(ngModel)]="formTitle.title_id" #titleIdModel="ngModel" name="title_id" title="Use 2 letters followed by 4 digits" placeholder="BU1032" readonly>
+    <p class="field-error" id="titleId-error" role="alert" *ngIf="showFieldError(titleIdModel)">Incorrect format. Use 2 letters then 4 digits, for example BU1032.</p>
 
-    <label for="title">Title: <span class="required">*</span></label>
-    <input type="text" id="title" [(ngModel)]="formTitle.title" #titleModel="ngModel" name="title" required maxlength="80" placeholder="e.g. The Busy Executive's Database Guide" [class.input-invalid]="showFieldError(titleModel)">
-    <p class="field-error" *ngIf="showFieldError(titleModel)">Title is required (max 80 characters).</p>
+    <label for="title">Title: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="title" [(ngModel)]="formTitle.title" #titleModel="ngModel" name="title" required maxlength="80" placeholder="e.g. The Busy Executive's Database Guide" [class.input-invalid]="showFieldError(titleModel)" [attr.aria-invalid]="showFieldError(titleModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(titleModel) ? 'title-error' : null">
+    <p class="field-error" id="title-error" role="alert" *ngIf="showFieldError(titleModel)">Title is required (max 80 characters).</p>
 
     <label for="type">Type:</label>
-    <input type="text" id="type" [(ngModel)]="formTitle.type" #typeModel="ngModel" name="type" maxlength="12" placeholder="e.g. business" [class.input-invalid]="showFieldError(typeModel)">
-    <p class="field-error" *ngIf="showFieldError(typeModel)">Type must be 12 characters or fewer.</p>
+    <input type="text" id="type" [(ngModel)]="formTitle.type" #typeModel="ngModel" name="type" maxlength="12" placeholder="e.g. business" [class.input-invalid]="showFieldError(typeModel)" [attr.aria-invalid]="showFieldError(typeModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(typeModel) ? 'type-error' : null">
+    <p class="field-error" id="type-error" role="alert" *ngIf="showFieldError(typeModel)">Type must be 12 characters or fewer.</p>
 
     <label for="pubId">Publisher:</label>
     <select id="pubId" [(ngModel)]="formTitle.pub_id" name="pub_id">

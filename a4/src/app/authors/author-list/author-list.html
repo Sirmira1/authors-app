@@ -86,6 +86,7 @@
 
     <div class="table-wrap">
         <table>
+            <caption class="sr-only">Authors. Use the column headers to sort. Each row has view, edit, and delete actions.</caption>
             <colgroup>
                 <col class="col-id">
                 <col class="col-first-name">
@@ -100,52 +101,52 @@
             </colgroup>
             <thead>
                 <tr>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('au_id')">
                     <span class="sortable-header" [class.active]="isActiveSort('au_id')" role="button" tabindex="0" (click)="sortByHeader('au_id')" (keydown.enter)="sortByHeader('au_id')" (keydown.space)="sortByHeader('au_id'); $event.preventDefault()">
                         ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('au_id') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('au_fname')">
                     <span class="sortable-header" [class.active]="isActiveSort('au_fname')" role="button" tabindex="0" (click)="sortByHeader('au_fname')" (keydown.enter)="sortByHeader('au_fname')" (keydown.space)="sortByHeader('au_fname'); $event.preventDefault()">
                         First Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('au_fname') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('au_lname')">
                     <span class="sortable-header" [class.active]="isActiveSort('au_lname')" role="button" tabindex="0" (click)="sortByHeader('au_lname')" (keydown.enter)="sortByHeader('au_lname')" (keydown.space)="sortByHeader('au_lname'); $event.preventDefault()">
                         Last Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('au_lname') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('phone')">
                     <span class="sortable-header" [class.active]="isActiveSort('phone')" role="button" tabindex="0" (click)="sortByHeader('phone')" (keydown.enter)="sortByHeader('phone')" (keydown.space)="sortByHeader('phone'); $event.preventDefault()">
                         Phone <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('phone') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('address')">
                     <span class="sortable-header" [class.active]="isActiveSort('address')" role="button" tabindex="0" (click)="sortByHeader('address')" (keydown.enter)="sortByHeader('address')" (keydown.space)="sortByHeader('address'); $event.preventDefault()">
                         Address <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('address') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('city')">
                     <span class="sortable-header" [class.active]="isActiveSort('city')" role="button" tabindex="0" (click)="sortByHeader('city')" (keydown.enter)="sortByHeader('city')" (keydown.space)="sortByHeader('city'); $event.preventDefault()">
                         City <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('city') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('state')">
                     <span class="sortable-header" [class.active]="isActiveSort('state')" role="button" tabindex="0" (click)="sortByHeader('state')" (keydown.enter)="sortByHeader('state')" (keydown.space)="sortByHeader('state'); $event.preventDefault()">
                         State <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('state') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('zip')">
                     <span class="sortable-header" [class.active]="isActiveSort('zip')" role="button" tabindex="0" (click)="sortByHeader('zip')" (keydown.enter)="sortByHeader('zip')" (keydown.space)="sortByHeader('zip'); $event.preventDefault()">
                         Zip <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('zip') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('contract')">
                     <span class="sortable-header" [class.active]="isActiveSort('contract')" role="button" tabindex="0" (click)="sortByHeader('contract')" (keydown.enter)="sortByHeader('contract')" (keydown.space)="sortByHeader('contract'); $event.preventDefault()">
                         Contract <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('contract') }}</span>
                     </span>
                 </th>
-                <th>Actions</th>
+                <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -170,9 +171,9 @@
                         </span>
                     </td>
                     <td class="actions-cell">
-                        <button [routerLink]="author.au_id ? ['/authors', author.au_id] : ['/authors']" [disabled]="!author.au_id">View Author Details</button>
-                        <button [routerLink]="author.au_id ? ['/authors/edit', author.au_id] : ['/authors']" [disabled]="!author.au_id">Edit Author</button>
-                        <button (click)="deleteAuthor(author.au_id)" [disabled]="!author.au_id">Delete Author</button>
+                        <button [routerLink]="author.au_id ? ['/authors', author.au_id] : ['/authors']" [disabled]="!author.au_id" [attr.aria-label]="'View details for ' + author.au_fname + ' ' + author.au_lname">View Author Details</button>
+                        <button [routerLink]="author.au_id ? ['/authors/edit', author.au_id] : ['/authors']" [disabled]="!author.au_id" [attr.aria-label]="'Edit ' + author.au_fname + ' ' + author.au_lname">Edit Author</button>
+                        <button (click)="deleteAuthor(author.au_id)" [disabled]="!author.au_id" [attr.aria-label]="'Delete ' + author.au_fname + ' ' + author.au_lname">Delete Author</button>
                     </td>
                 </tr>
                 <tr *ngIf="pagedAuthors.length === 0">

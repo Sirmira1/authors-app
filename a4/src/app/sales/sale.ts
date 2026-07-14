@@ -22,8 +22,8 @@ export interface Sale {
 })
 
 export class SaleService {
-  private apiUrl = 'http://localhost:3000/api/sales';
-  private storesUrl = 'http://localhost:3000/api/stores';
+  private apiUrl = 'http://localhost:5232/api/sales';
+  private storesUrl = 'http://localhost:5232/api/stores';
 
   constructor(private http: HttpClient) {}
 

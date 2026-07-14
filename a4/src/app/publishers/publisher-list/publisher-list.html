@@ -81,6 +81,7 @@
 
     <div class="table-wrap">
         <table>
+            <caption class="sr-only">Publishers. Use the column headers to sort. Each row has view, edit, and delete actions.</caption>
             <colgroup>
                 <col class="col-id">
                 <col class="col-name">
@@ -91,32 +92,32 @@
             </colgroup>
             <thead>
                 <tr>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('pub_id')">
                     <span class="sortable-header" [class.active]="isActiveSort('pub_id')" role="button" tabindex="0" (click)="sortByHeader('pub_id')" (keydown.enter)="sortByHeader('pub_id')" (keydown.space)="sortByHeader('pub_id'); $event.preventDefault()">
                         ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_id') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('pub_name')">
                     <span class="sortable-header" [class.active]="isActiveSort('pub_name')" role="button" tabindex="0" (click)="sortByHeader('pub_name')" (keydown.enter)="sortByHeader('pub_name')" (keydown.space)="sortByHeader('pub_name'); $event.preventDefault()">
                         Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_name') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('city')">
                     <span class="sortable-header" [class.active]="isActiveSort('city')" role="button" tabindex="0" (click)="sortByHeader('city')" (keydown.enter)="sortByHeader('city')" (keydown.space)="sortByHeader('city'); $event.preventDefault()">
                         City <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('city') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('state')">
                     <span class="sortable-header" [class.active]="isActiveSort('state')" role="button" tabindex="0" (click)="sortByHeader('state')" (keydown.enter)="sortByHeader('state')" (keydown.space)="sortByHeader('state'); $event.preventDefault()">
                         State <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('state') }}</span>
                     </span>
                 </th>
-                <th>
+                <th scope="col" [attr.aria-sort]="getAriaSort('country')">
                     <span class="sortable-header" [class.active]="isActiveSort('country')" role="button" tabindex="0" (click)="sortByHeader('country')" (keydown.enter)="sortByHeader('country')" (keydown.space)="sortByHeader('country'); $event.preventDefault()">
                         Country <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('country') }}</span>
                     </span>
                 </th>
-                <th>Actions</th>
+                <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>

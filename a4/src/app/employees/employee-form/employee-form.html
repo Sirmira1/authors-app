@@ -1,32 +1,32 @@
 <form #employeeForm="ngForm" (ngSubmit)="handleSubmit(employeeForm)">
     <h2>{{ mode === 'create' ? 'Create Employee' : 'Edit Employee' }}</h2>
     <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
-    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+    <p class="form-error" role="alert" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
         {{ errorMessage || localValidationMessage }}
     </p>
 
-    <label for="empId">Employee ID: <span class="required">*</span></label>
+    <label for="empId">Employee ID: <span class="required" aria-hidden="true">*</span></label>
     <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
-    <input type="text" id="empId" [(ngModel)]="formEmployee.emp_id" #empIdModel="ngModel" name="emp_id" required placeholder="PMA42628M" [class.input-invalid]="showFieldError(empIdModel)" disabled>
+    <input type="text" id="empId" [(ngModel)]="formEmployee.emp_id" #empIdModel="ngModel" name="emp_id" placeholder="PMA42628M" readonly>
 
-    <label for="fname">First Name: <span class="required">*</span></label>
-    <input type="text" id="fname" [(ngModel)]="formEmployee.fname" #fnameModel="ngModel" name="fname" required maxlength="20" placeholder="e.g. Paolo" [class.input-invalid]="showFieldError(fnameModel)">
-    <p class="field-error" *ngIf="showFieldError(fnameModel)">First name is required (max 20 characters).</p>
+    <label for="fname">First Name: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="fname" [(ngModel)]="formEmployee.fname" #fnameModel="ngModel" name="fname" required maxlength="20" placeholder="e.g. Paolo" [class.input-invalid]="showFieldError(fnameModel)" [attr.aria-invalid]="showFieldError(fnameModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(fnameModel) ? 'fname-error' : null">
+    <p class="field-error" id="fname-error" role="alert" *ngIf="showFieldError(fnameModel)">First name is required (max 20 characters).</p>
 
     <label for="minit">Middle Initial:</label>
-    <input type="text" id="minit" [(ngModel)]="formEmployee.minit" #minitModel="ngModel" name="minit" maxlength="1" placeholder="e.g. M" [class.input-invalid]="showFieldError(minitModel)">
-    <p class="field-error" *ngIf="showFieldError(minitModel)">Middle initial must be a single character.</p>
+    <input type="text" id="minit" [(ngModel)]="formEmployee.minit" #minitModel="ngModel" name="minit" maxlength="1" placeholder="e.g. M" [class.input-invalid]="showFieldError(minitModel)" [attr.aria-invalid]="showFieldError(minitModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(minitModel) ? 'minit-error' : null">
+    <p class="field-error" id="minit-error" role="alert" *ngIf="showFieldError(minitModel)">Middle initial must be a single character.</p>
 
-    <label for="lname">Last Name: <span class="required">*</span></label>
-    <input type="text" id="lname" [(ngModel)]="formEmployee.lname" #lnameModel="ngModel" name="lname" required maxlength="30" placeholder="e.g. Accorti" [class.input-invalid]="showFieldError(lnameModel)">
-    <p class="field-error" *ngIf="showFieldError(lnameModel)">Last name is required (max 30 characters).</p>
+    <label for="lname">Last Name: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="lname" [(ngModel)]="formEmployee.lname" #lnameModel="ngModel" name="lname" required maxlength="30" placeholder="e.g. Accorti" [class.input-invalid]="showFieldError(lnameModel)" [attr.aria-invalid]="showFieldError(lnameModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(lnameModel) ? 'lname-error' : null">
+    <p class="field-error" id="lname-error" role="alert" *ngIf="showFieldError(lnameModel)">Last name is required (max 30 characters).</p>
 
-    <label for="jobId">Job: <span class="required">*</span></label>
-    <select id="jobId" [(ngModel)]="formEmployee.job_id" #jobIdModel="ngModel" name="job_id" required [class.input-invalid]="showFieldError(jobIdModel)">
+    <label for="jobId">Job: <span class="required" aria-hidden="true">*</span></label>
+    <select id="jobId" [(ngModel)]="formEmployee.job_id" #jobIdModel="ngModel" name="job_id" required [class.input-invalid]="showFieldError(jobIdModel)" [attr.aria-invalid]="showFieldError(jobIdModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(jobIdModel) ? 'jobId-error' : null">
         <option [ngValue]="0" disabled>— Select a job —</option>
         <option *ngFor="let job of jobs" [ngValue]="job.job_id">{{ job.job_desc }}</option>
     </select>
-    <p class="field-error" *ngIf="showFieldError(jobIdModel)">Job is required.</p>
+    <p class="field-error" id="jobId-error" role="alert" *ngIf="showFieldError(jobIdModel)">Job is required.</p>
 
     <label for="jobLvl">Job Level:</label>
     <input type="number" id="jobLvl" [(ngModel)]="formEmployee.job_lvl" name="job_lvl" min="0" max="250" step="1" placeholder="e.g. 35">

@@ -338,6 +338,14 @@ export class AuthorListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getAriaSort(sortKey: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortKey !== sortKey) {
+      return 'none';
+    }
+
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   trackByAuthorId(_index: number, author: Author): string {
     return author.au_id;
   }

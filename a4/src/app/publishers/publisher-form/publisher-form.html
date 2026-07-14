@@ -1,30 +1,30 @@
 <form #publisherForm="ngForm" (ngSubmit)="handleSubmit(publisherForm)">
     <h2>{{ mode === 'create' ? 'Create Publisher' : 'Edit Publisher' }}</h2>
     <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
-    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+    <p class="form-error" role="alert" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
         {{ errorMessage || localValidationMessage }}
     </p>
 
-    <label for="pubId">Publisher ID: <span class="required">*</span></label>
+    <label for="pubId">Publisher ID: <span class="required" aria-hidden="true">*</span></label>
     <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
-    <input type="text" id="pubId" [(ngModel)]="formPublisher.pub_id" #pubIdModel="ngModel" name="pub_id" required pattern="^99\d{2}$" title="Use format 99##" placeholder="9999" [class.input-invalid]="showFieldError(pubIdModel)" disabled>
-    <p class="field-error" *ngIf="showFieldError(pubIdModel)">Incorrect format. Use 99## (for example 9999).</p>
+    <input type="text" id="pubId" [(ngModel)]="formPublisher.pub_id" #pubIdModel="ngModel" name="pub_id" title="Use format 99##" placeholder="9999" readonly>
+    <p class="field-error" id="pubId-error" role="alert" *ngIf="showFieldError(pubIdModel)">Incorrect format. Use 99## (for example 9999).</p>
 
-    <label for="pubName">Name: <span class="required">*</span></label>
-    <input type="text" id="pubName" [(ngModel)]="formPublisher.pub_name" #pubNameModel="ngModel" name="pub_name" required maxlength="40" placeholder="e.g. New Moon Books" [class.input-invalid]="showFieldError(pubNameModel)">
-    <p class="field-error" *ngIf="showFieldError(pubNameModel)">Publisher name is required (max 40 characters).</p>
+    <label for="pubName">Name: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="pubName" [(ngModel)]="formPublisher.pub_name" #pubNameModel="ngModel" name="pub_name" required maxlength="40" placeholder="e.g. New Moon Books" [class.input-invalid]="showFieldError(pubNameModel)" [attr.aria-invalid]="showFieldError(pubNameModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(pubNameModel) ? 'pubName-error' : null">
+    <p class="field-error" id="pubName-error" role="alert" *ngIf="showFieldError(pubNameModel)">Publisher name is required (max 40 characters).</p>
 
     <label for="city">City:</label>
-    <input type="text" id="city" [(ngModel)]="formPublisher.city" #cityModel="ngModel" name="city" pattern="^[\p{L}\s'.-]+$" maxlength="20" title="City must contain only letters" placeholder="e.g. Boston" [class.input-invalid]="showFieldError(cityModel)">
-    <p class="field-error" *ngIf="showFieldError(cityModel)">City must contain only letters, spaces, hyphens, apostrophes, and periods (no numbers).</p>
+    <input type="text" id="city" [(ngModel)]="formPublisher.city" #cityModel="ngModel" name="city" [pattern]="cityPattern" maxlength="20" title="City must contain only letters" placeholder="e.g. Boston" [class.input-invalid]="showFieldError(cityModel)" [attr.aria-invalid]="showFieldError(cityModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(cityModel) ? 'city-error' : null">
+    <p class="field-error" id="city-error" role="alert" *ngIf="showFieldError(cityModel)">City must contain only letters, spaces, hyphens, apostrophes, and periods (no numbers).</p>
 
     <label for="state">State:</label>
-    <input type="text" id="state" [(ngModel)]="formPublisher.state" #stateModel="ngModel" name="state" pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like MA" placeholder="MA" [class.input-invalid]="showFieldError(stateModel)">
-    <p class="field-error" *ngIf="showFieldError(stateModel)">Incorrect format. Use a 2-letter code, for example MA.</p>
+    <input type="text" id="state" [(ngModel)]="formPublisher.state" #stateModel="ngModel" name="state" pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like MA" placeholder="MA" [class.input-invalid]="showFieldError(stateModel)" [attr.aria-invalid]="showFieldError(stateModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(stateModel) ? 'state-error' : null">
+    <p class="field-error" id="state-error" role="alert" *ngIf="showFieldError(stateModel)">Incorrect format. Use a 2-letter code, for example MA.</p>
 
     <label for="country">Country:</label>
-    <input type="text" id="country" [(ngModel)]="formPublisher.country" #countryModel="ngModel" name="country" maxlength="30" placeholder="e.g. USA" [class.input-invalid]="showFieldError(countryModel)">
-    <p class="field-error" *ngIf="showFieldError(countryModel)">Country must be 30 characters or fewer.</p>
+    <input type="text" id="country" [(ngModel)]="formPublisher.country" #countryModel="ngModel" name="country" maxlength="30" placeholder="e.g. USA" [class.input-invalid]="showFieldError(countryModel)" [attr.aria-invalid]="showFieldError(countryModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(countryModel) ? 'country-error' : null">
+    <p class="field-error" id="country-error" role="alert" *ngIf="showFieldError(countryModel)">Country must be 30 characters or fewer.</p>
 
     <div class="actions">
         <button type="submit" [disabled]="isSubmitting || publisherForm.invalid">

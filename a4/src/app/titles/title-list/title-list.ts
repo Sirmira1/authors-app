@@ -367,6 +367,14 @@ export class TitleListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getAriaSort(sortKey: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortKey !== sortKey) {
+      return 'none';
+    }
+
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   trackByTitleId(_index: number, title: Title): string {
     return title.title_id;
   }

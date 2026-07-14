@@ -53,12 +53,14 @@ interface NavMenu {
               [class.open]="openMenu === menu.label"
               [class.active]="isMenuActive(menu.basePath)"
               [attr.aria-expanded]="openMenu === menu.label"
+              [attr.aria-controls]="'menu-' + menu.label"
+              aria-haspopup="true"
               (click)="toggleMenu(menu.label, $event)"
             >
               {{ menu.label }}
               <span class="gov-nav__caret" aria-hidden="true">▾</span>
             </button>
-            <ul class="gov-nav__dropdown" *ngIf="openMenu === menu.label" role="menu">
+            <ul class="gov-nav__dropdown" *ngIf="openMenu === menu.label" [id]="'menu-' + menu.label" role="menu" [attr.aria-label]="menu.label">
               <li *ngFor="let item of menu.links" role="none">
                 <a role="menuitem" [routerLink]="item.link" (click)="closeMenu()">{{ item.label }}</a>
               </li>
@@ -69,13 +71,17 @@ interface NavMenu {
             <button
               type="button"
               class="gov-nav__theme-btn"
+              [attr.aria-label]="theme.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+              [attr.aria-pressed]="theme.isDarkMode()"
               [title]="theme.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
               (click)="toggleTheme()"
             >
-              {{ theme.isDarkMode() ? 'Light' : 'Dark' }}
+              <span aria-hidden="true">{{ theme.isDarkMode() ? '☀️' : '🌙' }}</span>
             </button>
             <ng-container *ngIf="isLoggedIn; else signedOut">
-              <span class="gov-nav__user" title="Signed in">{{ currentUserName }}</span>
+              <span class="gov-nav__user">
+                <span class="sr-only">Signed in as </span>{{ currentUserName }}
+              </span>
               <button type="button" class="gov-nav__auth-btn" (click)="logout()">Sign Out</button>
             </ng-container>
             <ng-template #signedOut>

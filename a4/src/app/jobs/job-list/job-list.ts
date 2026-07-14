@@ -293,6 +293,14 @@ export class JobListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getAriaSort(sortKey: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortKey !== sortKey) {
+      return 'none';
+    }
+
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   trackByJobId(_index: number, job: Job): number {
     return job.job_id;
   }

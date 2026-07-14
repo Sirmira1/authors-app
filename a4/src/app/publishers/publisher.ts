@@ -14,7 +14,7 @@ export interface Publisher {
 })
 
 export class PublisherService {
-  private apiUrl = 'http://localhost:3000/api/publishers';
+  private apiUrl = 'http://localhost:5232/api/publishers';
 
   constructor(private http: HttpClient) {}
 

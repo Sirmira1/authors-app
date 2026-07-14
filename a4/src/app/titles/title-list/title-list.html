@@ -73,6 +73,7 @@
 
     <div class="table-wrap">
         <table style="min-width: 1100px;">
+            <caption class="sr-only">Titles. Use the column headers to sort. Each row has view, edit, and delete actions.</caption>
             <colgroup>
                 <col style="width: 80px">
                 <col>
@@ -85,42 +86,42 @@
             </colgroup>
             <thead>
                 <tr>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('title_id')">
                         <span class="sortable-header" [class.active]="isActiveSort('title_id')" role="button" tabindex="0" (click)="sortByHeader('title_id')" (keydown.enter)="sortByHeader('title_id')" (keydown.space)="sortByHeader('title_id'); $event.preventDefault()">
                             ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('title_id') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('title')">
                         <span class="sortable-header" [class.active]="isActiveSort('title')" role="button" tabindex="0" (click)="sortByHeader('title')" (keydown.enter)="sortByHeader('title')" (keydown.space)="sortByHeader('title'); $event.preventDefault()">
                             Title <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('title') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('type')">
                         <span class="sortable-header" [class.active]="isActiveSort('type')" role="button" tabindex="0" (click)="sortByHeader('type')" (keydown.enter)="sortByHeader('type')" (keydown.space)="sortByHeader('type'); $event.preventDefault()">
                             Type <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('type') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('pub_name')">
                         <span class="sortable-header" [class.active]="isActiveSort('pub_name')" role="button" tabindex="0" (click)="sortByHeader('pub_name')" (keydown.enter)="sortByHeader('pub_name')" (keydown.space)="sortByHeader('pub_name'); $event.preventDefault()">
                             Publisher <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_name') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('price')">
                         <span class="sortable-header" [class.active]="isActiveSort('price')" role="button" tabindex="0" (click)="sortByHeader('price')" (keydown.enter)="sortByHeader('price')" (keydown.space)="sortByHeader('price'); $event.preventDefault()">
                             Price <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('price') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('ytd_sales')">
                         <span class="sortable-header" [class.active]="isActiveSort('ytd_sales')" role="button" tabindex="0" (click)="sortByHeader('ytd_sales')" (keydown.enter)="sortByHeader('ytd_sales')" (keydown.space)="sortByHeader('ytd_sales'); $event.preventDefault()">
                             YTD Sales <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('ytd_sales') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('pubdate')">
                         <span class="sortable-header" [class.active]="isActiveSort('pubdate')" role="button" tabindex="0" (click)="sortByHeader('pubdate')" (keydown.enter)="sortByHeader('pubdate')" (keydown.space)="sortByHeader('pubdate'); $event.preventDefault()">
                             Pub Date <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pubdate') }}</span>
                         </span>
                     </th>
-                    <th>Actions</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>

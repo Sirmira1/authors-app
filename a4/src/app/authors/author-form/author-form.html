@@ -1,48 +1,49 @@
 <form #authorForm="ngForm" (ngSubmit)="handleSubmit(authorForm)">
     <h2>{{ mode === 'create' ? 'Create Author' : 'Edit Author' }}</h2>
     <p class="required-note">Fields marked with <span class="required">*</span> are required.</p>
-    <p class="form-error" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
+    <p class="form-error" role="alert" [style.display]="(errorMessage || localValidationMessage) ? 'block' : 'none'">
         {{ errorMessage || localValidationMessage }}
     </p>
 
-    <label for="auId">Author ID: <span class="required">*</span></label>
+    <label for="auId">Author ID: <span class="required" aria-hidden="true">*</span></label>
     <p class="auto-generated-note" *ngIf="mode === 'create'">Auto-generated</p>
-    <input type="text" id="auId" [(ngModel)]="formAuthor.au_id" #auIdModel="ngModel" name="au_id" required pattern="^\d{3}-\d{2}-\d{4}$" title="Use format 123-45-6789" placeholder="123-45-6789" [class.input-invalid]="showFieldError(auIdModel)" disabled>
-    <p class="field-error" *ngIf="showFieldError(auIdModel)">Incorrect format. Use 123-45-6789.</p>
+    <input type="text" id="auId" [(ngModel)]="formAuthor.au_id" #auIdModel="ngModel" name="au_id" title="Use format 123-45-6789" placeholder="123-45-6789" readonly>
+    <p class="field-error" id="auId-error" role="alert" *ngIf="showFieldError(auIdModel)">Incorrect format. Use 123-45-6789.</p>
 
-    <label for="auFname">First Name: <span class="required">*</span></label>
-    <input type="text" id="auFname" [(ngModel)]="formAuthor.au_fname" #auFnameModel="ngModel" name="au_fname" required pattern="^[a-zA-Z\s'-]+$" maxlength="20" placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)">
-    <p class="field-error" *ngIf="showFieldError(auFnameModel)">First name must contain only letters, spaces, hyphens, and apostrophes.</p>
+    <label for="auFname">First Name: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="auFname" [(ngModel)]="formAuthor.au_fname" #auFnameModel="ngModel" name="au_fname" required pattern="^[a-zA-Z\s'-]+$" maxlength="20" placeholder="e.g. Abraham" [class.input-invalid]="showFieldError(auFnameModel)" [attr.aria-invalid]="showFieldError(auFnameModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(auFnameModel) ? 'auFname-error' : null">
+    <p class="field-error" id="auFname-error" role="alert" *ngIf="showFieldError(auFnameModel)">First name must contain only letters, spaces, hyphens, and apostrophes.</p>
 
-    <label for="auLname">Last Name: <span class="required">*</span></label>
-    <input type="text" id="auLname" [(ngModel)]="formAuthor.au_lname" #auLnameModel="ngModel" name="au_lname" required pattern="^[a-zA-Z\s'-]+$" maxlength="40" placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)">
-    <p class="field-error" *ngIf="showFieldError(auLnameModel)">Last name must contain only letters, spaces, hyphens, and apostrophes.</p>
+    <label for="auLname">Last Name: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="auLname" [(ngModel)]="formAuthor.au_lname" #auLnameModel="ngModel" name="au_lname" required pattern="^[a-zA-Z\s'-]+$" maxlength="40" placeholder="e.g. Bennet" [class.input-invalid]="showFieldError(auLnameModel)" [attr.aria-invalid]="showFieldError(auLnameModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(auLnameModel) ? 'auLname-error' : null">
+    <p class="field-error" id="auLname-error" role="alert" *ngIf="showFieldError(auLnameModel)">Last name must contain only letters, spaces, hyphens, and apostrophes.</p>
 
-    <label for="phone">Phone: <span class="required">*</span></label>
-    <input type="text" id="phone" [(ngModel)]="formAuthor.phone" #phoneModel="ngModel" name="phone" required placeholder="000-000-0000" inputmode="numeric" (input)="formatPhoneNumber($event)" title="Phone number format: 000-000-0000" [class.input-invalid]="showFieldError(phoneModel)">
-    <p class="field-error" *ngIf="showFieldError(phoneModel)">Phone must be in format 000-000-0000.</p>
+    <label for="phone">Phone: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="phone" [(ngModel)]="formAuthor.phone" #phoneModel="ngModel" name="phone" required placeholder="000-000-0000" inputmode="numeric" (input)="formatPhoneNumber($event)" title="Phone number format: 000-000-0000" [class.input-invalid]="showFieldError(phoneModel)" [attr.aria-invalid]="showFieldError(phoneModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(phoneModel) ? 'phone-error' : null">
+    <p class="field-error" id="phone-error" role="alert" *ngIf="showFieldError(phoneModel)">Phone must be in format 000-000-0000.</p>
 
-    <label for="address">Address: <span class="required">*</span></label>
+    <label for="address">Address: <span class="required" aria-hidden="true">*</span></label>
     <div class="address-autocomplete">
-        <input type="text" id="address" [ngModel]="formAuthor.address" (ngModelChange)="onAddressInput($event)" (blur)="hideAddressSuggestions()" #addressModel="ngModel" name="address" required maxlength="40" autocomplete="off" placeholder="Start typing a Canadian address" [class.input-invalid]="showFieldError(addressModel)">
-        <ul class="address-suggestions" *ngIf="showAddressSuggestions">
-            <li *ngFor="let suggestion of addressSuggestions" (mousedown)="selectAddressSuggestion(suggestion)">
+        <input type="text" id="address" [ngModel]="formAuthor.address" (ngModelChange)="onAddressInput($event)" (blur)="hideAddressSuggestions()" #addressModel="ngModel" name="address" required maxlength="40" autocomplete="off" placeholder="Start typing a Canadian address" [class.input-invalid]="showFieldError(addressModel)" [attr.aria-invalid]="showFieldError(addressModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(addressModel) ? 'address-error' : null" role="combobox" [attr.aria-expanded]="showAddressSuggestions" aria-autocomplete="list" aria-controls="address-suggestions">
+        <ul class="address-suggestions" id="address-suggestions" role="listbox" *ngIf="showAddressSuggestions">
+            <li *ngFor="let suggestion of addressSuggestions" role="option" (mousedown)="selectAddressSuggestion(suggestion)">
                 {{ suggestion.label }}
             </li>
         </ul>
     </div>
+    <p class="field-error" id="address-error" role="alert" *ngIf="showFieldError(addressModel)">Address is required.</p>
 
-    <label for="city">City: <span class="required">*</span></label>
-    <input type="text" id="city" [(ngModel)]="formAuthor.city" #cityModel="ngModel" name="city" required pattern="^[\p{L}\s'.-]+$" maxlength="20" title="City must contain only letters" placeholder="e.g. Berkeley" [class.input-invalid]="showFieldError(cityModel)">
-    <p class="field-error" *ngIf="showFieldError(cityModel)">City must contain only letters, spaces, hyphens, apostrophes, and periods (no numbers).</p>
+    <label for="city">City: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="city" [(ngModel)]="formAuthor.city" #cityModel="ngModel" name="city" required [pattern]="cityPattern" maxlength="20" title="City must contain only letters" placeholder="e.g. Berkeley" [class.input-invalid]="showFieldError(cityModel)" [attr.aria-invalid]="showFieldError(cityModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(cityModel) ? 'city-error' : null">
+    <p class="field-error" id="city-error" role="alert" *ngIf="showFieldError(cityModel)">City must contain only letters, spaces, hyphens, apostrophes, and periods (no numbers).</p>
 
-    <label for="state">State: <span class="required">*</span></label>
-    <input type="text" id="state" [(ngModel)]="formAuthor.state" #stateModel="ngModel" name="state" required pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like CA" placeholder="CA" [class.input-invalid]="showFieldError(stateModel)">
-    <p class="field-error" *ngIf="showFieldError(stateModel)">Incorrect format. Use a 2-letter code, for example CA.</p>
+    <label for="state">State: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="state" [(ngModel)]="formAuthor.state" #stateModel="ngModel" name="state" required pattern="^[A-Za-z]{2}$" maxlength="2" title="Use 2-letter state code like CA" placeholder="CA" [class.input-invalid]="showFieldError(stateModel)" [attr.aria-invalid]="showFieldError(stateModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(stateModel) ? 'state-error' : null">
+    <p class="field-error" id="state-error" role="alert" *ngIf="showFieldError(stateModel)">Incorrect format. Use a 2-letter code, for example CA.</p>
 
-    <label for="zip">Zip: <span class="required">*</span></label>
-    <input type="text" id="zip" [(ngModel)]="formAuthor.zip" #zipModel="ngModel" name="zip" required pattern="^\d{5}$" maxlength="5" inputmode="numeric" title="Use 5-digit zip code" placeholder="94705" [class.input-invalid]="showFieldError(zipModel)">
-    <p class="field-error" *ngIf="showFieldError(zipModel)">Incorrect format. Use 5 digits, for example 94705.</p>
+    <label for="zip">Zip: <span class="required" aria-hidden="true">*</span></label>
+    <input type="text" id="zip" [(ngModel)]="formAuthor.zip" #zipModel="ngModel" name="zip" required pattern="^\d{5}$" maxlength="5" inputmode="numeric" title="Use 5-digit zip code" placeholder="94705" [class.input-invalid]="showFieldError(zipModel)" [attr.aria-invalid]="showFieldError(zipModel) ? 'true' : null" [attr.aria-describedby]="showFieldError(zipModel) ? 'zip-error' : null">
+    <p class="field-error" id="zip-error" role="alert" *ngIf="showFieldError(zipModel)">Incorrect format. Use 5 digits, for example 94705.</p>
 
     <label for="contract">Contract:</label>
     <input type="checkbox" id="contract" [(ngModel)]="formAuthor.contract" name="contract">

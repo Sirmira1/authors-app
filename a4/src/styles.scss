@@ -99,6 +99,32 @@ textarea {
     outline-offset: 2px;
 }
 
+/* Visually hidden but available to assistive technology (WCAG 1.3.1 / 4.1.2) */
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Respect users who prefer reduced motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 /* Dark mode table/list overrides with high specificity */
 html.dark-mode table {
     background: #0f172a !important;

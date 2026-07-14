@@ -336,6 +336,14 @@ export class EmployeeListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getAriaSort(sortKey: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortKey !== sortKey) {
+      return 'none';
+    }
+
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   trackByEmployeeId(_index: number, employee: Employee): string {
     return employee.emp_id;
   }

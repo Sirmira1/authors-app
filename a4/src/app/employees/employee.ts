@@ -19,7 +19,7 @@ export interface Employee {
 })
 
 export class EmployeeService {
-  private apiUrl = 'http://localhost:3000/api/employees';
+  private apiUrl = 'http://localhost:5232/api/employees';
 
   constructor(private http: HttpClient) {}
 

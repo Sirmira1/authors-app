@@ -24,7 +24,7 @@ const SALES_ACCESS_JOB_IDS = new Set([3, 4, 7, 13]);
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly apiUrl = 'http://localhost:5232/api/auth';
   private readonly http = inject(HttpClient);
   private readonly ngZone = inject(NgZone);
   private readonly platformId = inject(PLATFORM_ID);

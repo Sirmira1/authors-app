@@ -73,6 +73,7 @@
 
     <div class="table-wrap">
         <table style="min-width: 1050px;">
+            <caption class="sr-only">Employees. Use the column headers to sort. Each row has view, edit, and delete actions.</caption>
             <colgroup>
                 <col style="width: 130px">
                 <col>
@@ -84,37 +85,37 @@
             </colgroup>
             <thead>
                 <tr>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('emp_id')">
                         <span class="sortable-header" [class.active]="isActiveSort('emp_id')" role="button" tabindex="0" (click)="sortByHeader('emp_id')" (keydown.enter)="sortByHeader('emp_id')" (keydown.space)="sortByHeader('emp_id'); $event.preventDefault()">
                             ID <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('emp_id') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('lname')">
                         <span class="sortable-header" [class.active]="isActiveSort('lname')" role="button" tabindex="0" (click)="sortByHeader('lname')" (keydown.enter)="sortByHeader('lname')" (keydown.space)="sortByHeader('lname'); $event.preventDefault()">
                             Name <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('lname') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('job_desc')">
                         <span class="sortable-header" [class.active]="isActiveSort('job_desc')" role="button" tabindex="0" (click)="sortByHeader('job_desc')" (keydown.enter)="sortByHeader('job_desc')" (keydown.space)="sortByHeader('job_desc'); $event.preventDefault()">
                             Job <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('job_desc') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('job_lvl')">
                         <span class="sortable-header" [class.active]="isActiveSort('job_lvl')" role="button" tabindex="0" (click)="sortByHeader('job_lvl')" (keydown.enter)="sortByHeader('job_lvl')" (keydown.space)="sortByHeader('job_lvl'); $event.preventDefault()">
                             Level <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('job_lvl') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('pub_name')">
                         <span class="sortable-header" [class.active]="isActiveSort('pub_name')" role="button" tabindex="0" (click)="sortByHeader('pub_name')" (keydown.enter)="sortByHeader('pub_name')" (keydown.space)="sortByHeader('pub_name'); $event.preventDefault()">
                             Publisher <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('pub_name') }}</span>
                         </span>
                     </th>
-                    <th>
+                    <th scope="col" [attr.aria-sort]="getAriaSort('hire_date')">
                         <span class="sortable-header" [class.active]="isActiveSort('hire_date')" role="button" tabindex="0" (click)="sortByHeader('hire_date')" (keydown.enter)="sortByHeader('hire_date')" (keydown.space)="sortByHeader('hire_date'); $event.preventDefault()">
                             Hire Date <span class="sort-indicator" aria-hidden="true">{{ getSortIndicator('hire_date') }}</span>
                         </span>
                     </th>
-                    <th>Actions</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>

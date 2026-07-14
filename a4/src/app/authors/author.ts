@@ -18,7 +18,7 @@ export interface Author {
 })
 
 export class AuthorService {
-  private apiUrl = 'http://localhost:3000/api/authors';
+  private apiUrl = 'http://localhost:5232/api/authors';
 
   constructor(private http: HttpClient) {}
 

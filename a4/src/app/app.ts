@@ -9,9 +9,11 @@ import { KeyboardShortcutsService } from './shared/keyboard-shortcuts.service';
   selector: 'app-root',
   imports: [RouterOutlet, SiteHeaderComponent, SiteFooterComponent],
   template: `
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
     <app-site-header />
 
-    <main class="gov-main" id="main-content">
+    <main class="gov-main" id="main-content" tabindex="-1">
       <router-outlet />
     </main>
 
@@ -23,6 +25,30 @@ import { KeyboardShortcutsService } from './shared/keyboard-shortcuts.service';
         max-width: 1500px;
         margin: 0 auto;
         padding: 1rem;
+      }
+
+      .gov-main:focus {
+        outline: none;
+      }
+
+      .skip-link {
+        position: absolute;
+        left: 0.5rem;
+        top: -3rem;
+        z-index: 1000;
+        padding: 0.6rem 1rem;
+        background: #097a0a;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 0 0 8px 8px;
+        text-decoration: none;
+        transition: top 0.15s ease;
+      }
+
+      .skip-link:focus {
+        top: 0;
+        outline: 3px solid #ffbf47;
+        outline-offset: 2px;
       }
     `,
   ],

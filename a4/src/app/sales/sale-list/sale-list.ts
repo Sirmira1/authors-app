@@ -333,6 +333,14 @@ export class SaleListComponent implements OnInit {
     return this.sortDirection === 'asc' ? '▲' : '▼';
   }
 
+  getAriaSort(sortKey: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortKey !== sortKey) {
+      return 'none';
+    }
+
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   trackBySaleKey(_index: number, sale: Sale): string {
     return `${sale.stor_id}-${sale.ord_num}`;
   }
